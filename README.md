@@ -1,4 +1,4 @@
-# E-Commerce Learning Platform - Backend API
+# ByWay E-Learning Platform - Backend API
 
 _A robust and scalable e-learning platform_
 
