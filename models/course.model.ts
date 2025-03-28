@@ -56,7 +56,7 @@ interface ICourse extends Document {
   thumbnail: object;
   tags: string;
   level: string;
-  demoUrl: string;
+  demoVideo: object;
   category: string;
   benefits: { title: string[] };
   prerequisites: { title: string[] };
@@ -159,8 +159,13 @@ const courseSchema = new Schema<ICourse>(
       type: String,
       required: true,
     },
-    demoUrl: {
-      type: String,
+    demoVideo: {
+      id: {
+        type: String,
+      },
+      url: {
+        type: String,
+      },
     },
     category: { type: String, required: true },
     benefits: [{ title: String }],

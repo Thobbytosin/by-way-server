@@ -23,6 +23,18 @@ export const uploadCourse = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const data = req.body;
+      const { demoVideo, thumbnail } = req.files;
+      //for the arrays
+      const parsedBenefits = JSON.parse(data.benefits);
+      const parsedPrerequisites = JSON.parse(data.prerequisites);
+      const parsedCourseData = JSON.parse(data.courseData);
+
+      data.prerequisites = parsedPrerequisites;
+      data.benefits = parsedBenefits;
+      data.courseData = parsedCourseData;
+
+      if (!demoVideo)
+        return next(new ErrorHandler("Upload Course Intro Video", 403));
 
       if (!data) return next(new ErrorHandler("Fields are missing", 422));
 
@@ -38,13 +50,29 @@ export const uploadCourse = catchAsyncError(
       if (isCourseExist)
         return next(new ErrorHandler("Course already exists", 422));
 
-      const thumbnail = data.thumbnail;
+      // for image upload
+
+      if (!thumbnail) return next(new ErrorHandler("Upload Course Image", 403));
+
+      if (Array.isArray(thumbnail))
+        return next(new ErrorHandler("Multiple images not allowed", 422));
+
+      if (!thumbnail.mimetype?.startsWith("image"))
+        return next(
+          new ErrorHandler(
+            "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
+            404
+          )
+        );
 
       if (thumbnail) {
-        const folderPath = `byWay/courses/${data.category}`;
+        const folderPath = `byWay/courses/${data.name}/thumbnail`;
+
+        // delete old thumbnail
+        await cloudApi.delete_resources_by_prefix(folderPath);
         //
         await cloudUploader.upload(
-          thumbnail,
+          thumbnail.filepath,
           {
             folder: folderPath,
             transformation: {
@@ -63,6 +91,68 @@ export const uploadCourse = catchAsyncError(
             data.thumbnail = {
               id: thumbnailId,
               url: thumbnailUrl,
+            };
+          }
+        );
+      }
+
+      // for video upload
+      if (Array.isArray(demoVideo))
+        return next(new ErrorHandler("Multiple videos not allowed", 422));
+
+      // 2. Check if the file is a video (not an image)
+      if (!demoVideo.mimetype?.startsWith("video/")) {
+        return next(
+          new ErrorHandler(
+            "Invalid format. File must be a video (e.g., .mp4, .mov)",
+            400
+          )
+        );
+      }
+
+      // 3. Validate file size (e.g., 100MB limit)
+      const MAX_SIZE_BYTES = 30 * 1024 * 1024; // 100MB
+      if (demoVideo.size > MAX_SIZE_BYTES) {
+        return next(
+          new ErrorHandler(
+            `Video exceeds ${MAX_SIZE_BYTES / (1024 * 1024)}MB limit`,
+            413 // Payload Too Large
+          )
+        );
+      }
+
+      // upload the demoVideo to the cloudinary db
+
+      if (demoVideo) {
+        // create a folder path
+        const folderPath = `byWay/courses/${data.name}/demoVideo`;
+
+        // delete old video
+        await cloudApi.delete_resources_by_prefix(folderPath);
+
+        await cloudUploader.upload(
+          demoVideo.filepath,
+          {
+            folder: folderPath,
+            resource_type: "video",
+            chunk_size: 6000000,
+            max_file_size: 30000000, // 30mb
+            eager: [
+              { width: 640, height: 360, crop: "scale" }, // Generate a lower-res version
+            ],
+          },
+          async (error: any, result) => {
+            if (error) return next(new ErrorHandler(error.message, 400));
+
+            const publicId = result?.public_id;
+
+            const demoVideoId = publicId?.split("/").pop();
+
+            const demoVideoUrl = result?.secure_url;
+
+            data.demoVideo = {
+              id: demoVideoId,
+              url: demoVideoUrl,
             };
           }
         );

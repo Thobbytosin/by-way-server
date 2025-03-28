@@ -15,6 +15,7 @@ import {
   uploadCourse,
 } from "../controllers/course.controller";
 import { updateAccessToken } from "../controllers/user.controller";
+import { fileParser } from "../middlewares/fileParser";
 
 const courseRouter = express.Router();
 
@@ -24,6 +25,7 @@ courseRouter.post(
   updateAccessToken,
   isAuthenticated,
   authorizeRoles("admin"),
+  fileParser,
   uploadCourse
 );
 

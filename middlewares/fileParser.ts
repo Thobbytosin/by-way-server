@@ -10,6 +10,15 @@ export const fileParser = async (
 
   const [fields, files] = await form.parse(req as any);
 
+  // console.log(fields);
+  // console.log(files);
+
+  // for the product name, description ... data
+  // example of data coming: {name: ['John'], age: ['24']} turns it to {name: 'John',....}
+  for (let key in fields) {
+    req.body[key] = fields[key]![0];
+  }
+
   if (!req.files) req.files = {};
 
   for (let key in files) {
