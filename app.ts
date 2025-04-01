@@ -23,15 +23,15 @@ app.use(cookieParser());
 // to send form data to server
 app.use(express.urlencoded({ extended: false }));
 
+const allowedOrigins = [
+  process.env.NODE_ENV === "development" && "http://localhost:3000",
+  "https://e-learning-edu.onrender.com",
+].filter(Boolean);
+
 //CORS - cross-origin resource sharing
 app.use(
   cors({
-    // origin: process.env.ORIGIN,
-    // origin: "http://localhost:3000",
-    // origin: "https://by-way.onrender.com",
-    origin: "https://e-learning-edu.onrender.com",
-    // origin: ["http://localhost:3000", "http://192.168.45.227:3000"],
-    // origin: "http://192.168.45.227:3000", // FOR MOBILE
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
     credentials: true,
   })

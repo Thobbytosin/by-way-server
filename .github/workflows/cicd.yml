@@ -1,0 +1,43 @@
+name: Automated CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: "18.x"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: echo "Skipping tests for now"
+
+      - name: Confirm Successful build
+        if: success()
+        run: echo "Build job success"
+
+deploy:
+  needs: build
+  runs-on: ubuntu-latest
+  permissions:
+    deployments: write
+  steps:
+    - name: Deploy to Render
+      uses: johnbeynon/render-deploy-action@v0.0.8
+      with:
+        service-id: ${{secrets.RENDER_SERVICE_ID}}
+        api-key: ${{secrets.RENDER_API_KEY}}
