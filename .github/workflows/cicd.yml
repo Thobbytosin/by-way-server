@@ -41,3 +41,6 @@ jobs:
         with:
           service-id: ${{secrets.RENDER_SERVICE_I}}
           api-key: ${{secrets.RENDER_API_KEY}}
+      - name: Confirm Deployment Success
+        if: success()
+        run: echo "Deployment completed successfully!"
