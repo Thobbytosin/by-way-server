@@ -27,8 +27,9 @@ app.use(express.urlencoded({ extended: false }));
 app.use(
   cors({
     // origin: process.env.ORIGIN,
-    origin: "http://localhost:3000",
+    // origin: "http://localhost:3000",
     // origin: "https://by-way.onrender.com",
+    origin: "https://e-learning-edu.onrender.com",
     // origin: ["http://localhost:3000", "http://192.168.45.227:3000"],
     // origin: "http://192.168.45.227:3000", // FOR MOBILE
     methods: ["GET", "POST", "PATCH", "PUT", "DELETE"],
