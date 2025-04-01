@@ -68,6 +68,22 @@ _A robust and scalable e-learning platform_
 | /api/v1/update-user-videos-viewed | PUT    | Update viewed courses               | Yes           |
 | /api/v1/get-users-latest          | GET    | User latest details                 | Yes           |
 
+- Course Endpoints
+
+| Endpoint                              | Method | Description                               | Auth Required |
+| ------------------------------------- | ------ | ----------------------------------------- | ------------- |
+| /api/v1/create-course                 | POST   | Upload Course (Admin)                     | Yes (Admin)   |
+| /api/v1/edit-course/:course_id        | PUT    | Update Course (Admin)                     | Yes (Admin)   |
+| /api/v1/get-course/:course_id         | GET    | Fetch a Course (not all details)          | No            |
+| /api/v1/get-courses                   | GET    | Fetch all Courses (not all details)       | No            |
+| /api/v1/get-course-content/:course_id | GET    | Fetch course data (Paid Users)            | Yes           |
+| /api/v1/add-question                  | PUT    | Post question on a course (Paid Users)    | Yes           |
+| /api/v1/add-answer                    | PUT    | Reply a question on a course (Paid Users) | Yes           |
+| /api/v1/add-review/:course_id         | PUT    | Post a review (Paid Users)                | Yes           |
+| /api/v1/add-reply-review              | PUT    | Reply a review (Admin)                    | Yes (Admin)   |
+| /api/v1/get-all-courses               | GET    | Fetch all courses (Admin)                 | Yes (Admin)   |
+| /api/v1/delete-course/:courseId       | DELETE | Delete a course (Admin)                   | Yes (Admin)   |
+
 ## 🤝 Contributing
 
 - Fork the project
