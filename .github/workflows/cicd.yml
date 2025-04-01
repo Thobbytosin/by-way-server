@@ -26,6 +26,23 @@ jobs:
       - name: Run tests
         run: echo "Skipping tests for now"
 
+      - name: Debug Secrets
+        run: |
+          echo "Checking if secrets are available..."
+          if [[ -z "${{ secrets.RENDER_API_KE }}" ]]; then
+            echo "❌ RENDER_API_KEY is missing!"
+            exit 1
+          else
+            echo "✅ RENDER_API_KEY is set!"
+          fi
+
+          if [[ -z "${{ secrets.RENDER_SERVICE_ID }}" ]]; then
+            echo "❌ RENDER_SERVICE_ID is missing!"
+            exit 1
+          else
+            echo "✅ RENDER_SERVICE_ID is set!"
+          fi
+
       - name: Confirm Successful build
         if: success()
         run: echo "Build job success"
@@ -43,22 +60,11 @@ jobs:
           api-key: ${{secrets.RENDER_API_KEY}}
 
       - name: Check Deployment Response
+        if: failure() # This will only run if the previous step fails
         run: |
-          if [[ "${{ steps.deploy_step.outcome }}" != "success" ]]; then
-            echo "❌ Deployment failed! Response received: 404"
-            exit 1
-          fi
+          echo "❌ Deployment failed! Exiting..."
+          exit 1
 
       - name: Confirm Deployment Success
-        if: success()
-        run: echo "Deployment completed successfully!"
-
-      - name: Handle Deployment Failure
-        if: failure()
-        run: |
-          echo "Deployment failed!"
-          echo "Possible reasons:"
-          echo "- Incorrect API Key"
-          echo "- Incorrect Service ID"
-          echo "- Render service is unreachable"
-          exit 1
+        if: success() # This ensures it only runs on success
+        run: echo "✅ Deployment completed successfully!"
