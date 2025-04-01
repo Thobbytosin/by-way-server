@@ -42,6 +42,13 @@ jobs:
           service-id: ${{secrets.RENDER_SERVICE_I}}
           api-key: ${{secrets.RENDER_API_KEY}}
 
+      - name: Check Deployment Response
+        run: |
+          if [[ "${{ steps.deploy_step.outcome }}" != "success" ]]; then
+            echo "❌ Deployment failed! Response received: 404"
+            exit 1
+          fi
+
       - name: Confirm Deployment Success
         if: success()
         run: echo "Deployment completed successfully!"
