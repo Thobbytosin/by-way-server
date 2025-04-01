@@ -41,6 +41,17 @@ jobs:
         with:
           service-id: ${{secrets.RENDER_SERVICE_I}}
           api-key: ${{secrets.RENDER_API_KEY}}
+
       - name: Confirm Deployment Success
         if: success()
         run: echo "Deployment completed successfully!"
+
+      - name: Handle Deployment Failure
+        if: failure()
+        run: |
+          echo "Deployment failed!"
+          echo "Possible reasons:"
+          echo "- Incorrect API Key"
+          echo "- Incorrect Service ID"
+          echo "- Render service is unreachable"
+          exit 1
