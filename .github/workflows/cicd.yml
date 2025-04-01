@@ -29,7 +29,7 @@ jobs:
       - name: Debug Secrets
         run: |
           echo "Checking if secrets are available..."
-          if [[ -z "${{ secrets.RENDER_API_KEY }}" ]]; then
+          if [[ -z "${{ secrets.RENDER_API_KE }}" ]]; then
             echo "❌ RENDER_API_KEY is missing!"
             exit 1
           else
