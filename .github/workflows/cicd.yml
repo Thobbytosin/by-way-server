@@ -30,14 +30,14 @@ jobs:
         if: success()
         run: echo "Build job success"
 
-deploy:
-  needs: build
-  runs-on: ubuntu-latest
-  permissions:
-    deployments: write
-  steps:
-    - name: Deploy to Render
-      uses: johnbeynon/render-deploy-action@v0.0.8
-      with:
-        service-id: ${{secrets.RENDER_SERVICE_ID}}
-        api-key: ${{secrets.RENDER_API_KEY}}
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      deployments: write
+    steps:
+      - name: Deploy to Render
+        uses: johnbeynon/render-deploy-action@v0.0.8
+        with:
+          service-id: ${{secrets.RENDER_SERVICE_ID}}
+          api-key: ${{secrets.RENDER_API_KEY}}
