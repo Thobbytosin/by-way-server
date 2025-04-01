@@ -29,11 +29,19 @@ jobs:
       - name: Debug Secrets
         run: |
           echo "Checking if secrets are available..."
-          if [ -z "${{ secrets.RENDER_API_KEY }}" ]; then
+          if [[ -z "${{ secrets.RENDER_API_KEY }}" ]]; then
             echo "❌ RENDER_API_KEY is missing!"
             exit 1
           else
             echo "✅ RENDER_API_KEY is set!"
+          fi
+
+          if [[ -z "${{ secrets.RENDER_SERVICE_ID }}" ]]; then
+            echo "❌ RENDER_SERVICE_ID is missing!"
+            exit 1
+          else
+            echo "✅ RENDER_SERVICE_ID is set!"
+          fi
 
       - name: Confirm Successful build
         if: success()
