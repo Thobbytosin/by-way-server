@@ -43,6 +43,20 @@ jobs:
             echo "✅ RENDER_SERVICE_ID is set!"
           fi
 
+      - name: Validate all required secrets
+        run: |
+          missing=""
+          for key in CLOUD_NAME CLOUD_KEY CLOUD_SECRET VDOCIPHER_API_SECRET ACCESS_TOKEN_SIGN_IN; do
+            if [ -z "${{ secrets[$key] }}" ]; then
+              echo "❌ Missing secret: $key"
+              missing="yes"
+            fi
+          done
+          if [ "$missing" = "yes" ]; then
+            echo "💥 Exiting due to missing secrets"
+            exit 1
+          fi
+
       - name: Build Docker image
         run: docker build -t e-learning-server .
 
