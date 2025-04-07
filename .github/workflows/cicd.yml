@@ -47,25 +47,18 @@ jobs:
         run: |
           missing=""
 
-          check_secret() {
-            if [ -z "${{ secrets.$1 }}" ]; then
-              echo "❌ Missing secret: $1"
-              missing="yes"
-            else
-              echo "✅ $1 is set"
-            fi
-          }
+           if [ -z "${{ secrets.CLOUD_NAME }}" ]; then echo "❌ CLOUD_NAME is missing"; missing="yes"; fi
+           if [ -z "${{ secrets.CLOUD_KEY }}" ]; then echo "❌ CLOUD_KEY is missing"; missing="yes"; fi
+           if [ -z "${{ secrets.CLOUD_SECRET }}" ]; then echo "❌ CLOUD_SECRET is missing"; missing="yes"; fi
+           if [ -z "${{ secrets.VDOCIPHER_API_SECRET }}" ]; then echo "❌ VDOCIPHER_API_SECRET is missing"; missing="yes"; fi
+           if [ -z "${{ secrets.ACCESS_TOKEN_SIGN_IN }}" ]; then echo "❌ ACCESS_TOKEN_SIGN_IN is missing"; missing="yes"; fi
 
-          check_secret "CLOUD_NAME"
-          check_secret "CLOUD_KEY"
-          check_secret "CLOUD_SECRET"
-          check_secret "VDOCIPHER_API_SECRET"
-          check_secret "ACCESS_TOKEN_SIGN_IN"
-
-          if [ "$missing" = "yes" ]; then
-            echo "💥 Exiting due to missing secrets"
-            exit 1
-          fi
+           if [ "$missing" = "yes" ]; then
+             echo "🚨 Exiting due to missing secrets."
+             exit 1
+           else
+             echo "✅ All required secrets are set."
+           fi
 
       - name: Build Docker image
         run: docker build -t e-learning-server .
