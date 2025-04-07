@@ -81,9 +81,9 @@ jobs:
             -e ORIGIN=${{ secrets.ORIGIN }} \
             -e NODE_ENV=${{ secrets.NODE_ENV }} \
             -e DB_URL=${{ secrets.DB_URL }} \
-            -e CLOUD_NAME=${{ secrets.CLOUD_NAME }} \
-            -e CLOUD_KEY=${{ secrets.CLOUD_KEY }} \
-            -e CLOUD_SECRET=${{ secrets.CLOUD_SECRET }} \
+            -e CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }} \
+            -e CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }} \
+            -e CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }} \
             -e REDIS_URL=${{ secrets.REDIS_URL }} \
             -e ACTIVATION_SECRET=${{ secrets.ACTIVATION_SECRET }} \
             -e ACCESS_TOKEN_SIGN_IN=${{ secrets.ACCESS_TOKEN_SIGN_IN }} \
