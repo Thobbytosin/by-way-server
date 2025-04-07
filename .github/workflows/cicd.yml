@@ -98,7 +98,7 @@ jobs:
             -e VDOCIPHER_API_SECRET=${{ secrets.VDOCIPHER_API_SECRET }} \
             -e STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
             -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
-            "e-learning-server"
+            e-learning-server
 
       - name: Confirm Successful build
         if: success()
