@@ -80,10 +80,20 @@ jobs:
             echo "⏳ Waiting for server to start..."
             sleep 10
 
-            echo "✅ Server responded successfully"
+            echo "Checking logs..."
+            logs=$(docker logs e-learning-container)
 
-            echo "🛑 Stopping container..."
-            docker stop e-learning-test
+            echo "$logs"
+
+            if [[ "$logs" == *"Redis connected"* && "$logs" == *"Application is running on port 8000"* && "$logs" == *"Connected to database SUCCESSFULLY"* ]]; then
+              echo "✅ All services are up!"
+              docker stop e-learning-container
+            else
+              echo "❌ One or more services failed to start."
+              docker logs e-learning-container
+              docker stop e-learning-container
+              exit 1
+            fi
 
       - name: Confirm Successful build
         if: success()
