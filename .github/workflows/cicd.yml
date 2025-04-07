@@ -72,29 +72,30 @@ jobs:
 
       - name: Run Docker container with GitHub Secrets
         run: |
-          docker run -d --rm \
+          echo "🚀 Starting Docker container..."
+          container_id=$(docker run -d \
             -p 8000:8000 \
             --env-file .env \
-            e-learning-server
+            e-learning-server)
 
-            echo "⏳ Waiting for server to start..."
-            sleep 10
+          echo "🕒 Waiting for container to boot up..."
+          sleep 10
 
-            echo "Checking logs..."
-            logs=$(docker logs e-learning-container)
+          echo "📦 Container ID: $container_id"
 
-            echo "$logs"
+          echo "🔍 Checking logs..."
+          logs=$(docker logs "$container_id")
+          echo "$logs"
 
-            if [[ "$logs" == *"Redis connected"* && "$logs" == *"Application is running on port 8000"* && "$logs" == *"Connected to database SUCCESSFULLY"* ]]; then
-              echo "✅ All services are up!"
-              docker stop e-learning-container
-            else
-              echo "❌ One or more services failed to start."
-              docker logs e-learning-container
-              docker stop e-learning-container
-              exit 1
-            fi
-
+          echo "🧪 Validating services..."
+          if [[ "$logs" == *"Redis connected"* && "$logs" == *"Application is running on port"* && "$logs" == *"Connected to database SUCCESSFULLY"* ]]; then
+            echo "✅ All services started correctly!"
+            docker stop "$container_id"
+          else
+            echo "❌ One or more services failed to start."
+            docker stop "$container_id"
+            exit 1
+          fi
       - name: Confirm Successful build
         if: success()
         run: echo "Build job success"
