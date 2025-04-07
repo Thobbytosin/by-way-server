@@ -46,12 +46,22 @@ jobs:
       - name: Validate all required secrets
         run: |
           missing=""
-          for key in CLOUD_NAME CLOUD_KEY CLOUD_SECRET VDOCIPHER_API_SECRET ACCESS_TOKEN_SIGN_IN; do
-            if [ -z "${{ secrets[$key] }}" ]; then
-              echo "❌ Missing secret: $key"
+
+          check_secret() {
+            if [ -z "${{ secrets.$1 }}" ]; then
+              echo "❌ Missing secret: $1"
               missing="yes"
+            else
+              echo "✅ $1 is set"
             fi
-          done
+          }
+
+          check_secret "CLOUD_NAME"
+          check_secret "CLOUD_KEY"
+          check_secret "CLOUD_SECRET"
+          check_secret "VDOCIPHER_API_SECRET"
+          check_secret "ACCESS_TOKEN_SIGN_IN"
+
           if [ "$missing" = "yes" ]; then
             echo "💥 Exiting due to missing secrets"
             exit 1
