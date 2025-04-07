@@ -36,7 +36,7 @@ jobs:
             echo "✅ RENDER_API_KEY is set!"
           fi
 
-          if [[ -z "${{ secrets.RENDER_SERVICE_D }}" ]]; then
+          if [[ -z "${{ secrets.RENDER_SERVICE_ID }}" ]]; then
             echo "❌ RENDER_SERVICE_ID is missing!"
             exit 1
           else
