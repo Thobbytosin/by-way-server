@@ -22,7 +22,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "PORT=8000" >> .env
           echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
           echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
