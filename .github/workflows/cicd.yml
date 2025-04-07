@@ -43,18 +43,18 @@ jobs:
             echo "✅ RENDER_SERVICE_ID is set!"
           fi
 
-          if [[ -z "${{ secrets.CLOUD_NAME }}" ]]; then
-            echo "❌ CLOUD_NAME is missing!"
+          if [[ -z "${{ secrets.CLOUDINARY_NAME }}" ]]; then
+            echo "❌ CLOUDINARY_NAME is missing!"
             exit 1
           else
-            echo "✅ CLOUD_NAME is set!"
+            echo "✅ CLOUDINARY_NAME is set!"
           fi
 
-          if [[ -z "${{ secrets.CLOUD_KEY }}" ]]; then
-            echo "❌ CLOUD_KEY is missing!"
+          if [[ -z "${{ secrets.CLOUDINARY_KEY }}" ]]; then
+            echo "❌ CLOUDINARY_KEY is missing!"
             exit 1
           else
-            echo "✅ CLOUD_KEY is set!"
+            echo "✅ CLOUDINARY_KEY is set!"
           fi
 
       # - name: Validate all required secrets
