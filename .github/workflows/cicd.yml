@@ -23,8 +23,26 @@ jobs:
       - name: Create .env file
         run: |
           echo "PORT=${{ secrets.PORT }}" >> .env
+          echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
           echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
-          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
+          echo "CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}" >> .env
+          echo "CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}" >> .env
+          echo "ACTIVATION_SECRET=${{ secrets.ACTIVATION_SECRET }}" >> .env
+          echo "ACCESS_TOKEN_SIGN_IN=${{ secrets.ACCESS_TOKEN_SIGN_IN }}" >> .env
+          echo "REFRESH_TOKEN_SIGN_IN=${{ secrets.REFRESH_TOKEN_SIGN_IN }}" >> .env
+          echo "ACCESS_TOKEN_EXPIRE=${{ secrets.ACCESS_TOKEN_EXPIRE }}" >> .env
+          echo "REFRESH_TOKEN_EXPIRE=${{ secrets.REFRESH_TOKEN_EXPIRE }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+          echo "SMTP_SERVICE=${{ secrets.SMTP_SERVICE }}" >> .env
+          echo "SMTP_MAIL=${{ secrets.SMTP_MAIL }}" >> .env
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+          echo "VDOCIPHER_API_SECRET=${{ secrets.VDOCIPHER_API_SECRET }}" >> .env
+          echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
 
       - name: Install dependencies
         run: npm install
