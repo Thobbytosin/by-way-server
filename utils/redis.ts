@@ -3,14 +3,12 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// redis is for cache maintenance
+dotenv.config();
 
-const redisClient = () => {
-  if (process.env.REDIS_URL) {
-    console.log("REDIS CONNECTED");
-    return process.env.REDIS_URL;
-  }
-  throw new Error("Redis connection failed");
-};
+if (!process.env.REDIS_URL) {
+  throw new Error("❌ Redis connection failed: REDIS_URL not found");
+}
 
-export const redis = new Redis(redisClient());
+console.log("✅ Redis connected");
+
+export const redis = new Redis(process.env.REDIS_URL);

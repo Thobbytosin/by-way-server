@@ -20,6 +20,30 @@ jobs:
         with:
           node-version: "18.x"
 
+      - name: Create .env file
+        run: |
+          echo "PORT=8000" >> .env
+          echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
+          echo "DB_URL=${{ secrets.DB_URL }}" >> .env
+          echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
+          echo "CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }}" >> .env
+          echo "CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }}" >> .env
+          echo "ACTIVATION_SECRET=${{ secrets.ACTIVATION_SECRET }}" >> .env
+          echo "ACCESS_TOKEN_SIGN_IN=${{ secrets.ACCESS_TOKEN_SIGN_IN }}" >> .env
+          echo "REFRESH_TOKEN_SIGN_IN=${{ secrets.REFRESH_TOKEN_SIGN_IN }}" >> .env
+          echo "ACCESS_TOKEN_EXPIRE=${{ secrets.ACCESS_TOKEN_EXPIRE }}" >> .env
+          echo "REFRESH_TOKEN_EXPIRE=${{ secrets.REFRESH_TOKEN_EXPIRE }}" >> .env
+          echo "SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .env
+          echo "SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .env
+          echo "SMTP_SERVICE=${{ secrets.SMTP_SERVICE }}" >> .env
+          echo "SMTP_MAIL=${{ secrets.SMTP_MAIL }}" >> .env
+          echo "SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .env
+          echo "VDOCIPHER_API_SECRET=${{ secrets.VDOCIPHER_API_SECRET }}" >> .env
+          echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
+          echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+
       - name: Install dependencies
         run: npm install
 
@@ -43,6 +67,35 @@ jobs:
             echo "✅ RENDER_SERVICE_ID is set!"
           fi
 
+      - name: Build Docker image
+        run: docker build -t e-learning-server .
+
+      - name: Run Docker container with GitHub Secrets
+        run: |
+          echo "🚀 Starting Docker container..."
+          container_id=$(docker run -d \
+            -p 8000:8000 \
+            --env-file .env \
+            e-learning-server)
+
+          echo "🕒 Waiting for container to boot up..."
+          sleep 10
+
+          echo "📦 Container ID: $container_id"
+
+          echo "🔍 Checking logs..."
+          logs=$(docker logs "$container_id")
+          echo "$logs"
+
+          echo "🧪 Validating services..."
+          if [[ "$logs" == *"Redis connected"* && "$logs" == *"Application is running on port"* && "$logs" == *"Connected to database SUCCESSFULLY"* ]]; then
+            echo "✅ All services started correctly!"
+            docker stop "$container_id"
+          else
+            echo "❌ One or more services failed to start."
+            docker stop "$container_id"
+            exit 1
+          fi
       - name: Confirm Successful build
         if: success()
         run: echo "Build job success"
@@ -68,3 +121,103 @@ jobs:
       - name: Confirm Deployment Success
         if: success() # This ensures it only runs on success
         run: echo "✅ Deployment completed successfully!"
+#       name: Automated CI/CD Pipeline
+
+# on:
+#   push:
+#     branches:
+#       - master
+#   pull_request:
+#     branches:
+#       - master
+
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
+
+#     services:
+#       redis:
+#         image: redis:6
+#         ports:
+#           - 6379:6379
+#         options: >-
+#           --health-cmd "redis-cli ping"
+#           --health-interval 10s
+#           --health-timeout 5s
+#           --health-retries 5
+
+#     steps:
+#       - name: Checkout code
+#         uses: actions/checkout@v2
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v2
+#         with:
+#           node-version: "18.x"
+
+#       - name: Create .env file
+#         run: |
+#           echo "PORT=3000" >> .env
+#           echo "REDIS_URL=redis://localhost:6379" >> .env
+#           echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+
+#       - name: Install dependencies
+#         run: npm install
+
+#       - name: Run build
+#         run: npm run build
+
+#       - name: Run Docker container
+#         run: |
+#           docker build -t my-app .
+#           docker run --rm \
+#             --env-file .env \
+#             my-app
+
+#       - name: Confirm Successful Build
+#         if: success()
+#         run: echo "✅ Build and container run completed"
+
+#   deploy:
+#     needs: build
+#     runs-on: ubuntu-latest
+#     permissions:
+#       deployments: write
+
+#     steps:
+#       - name: Deploy to Render
+#         uses: johnbeynon/render-deploy-action@v0.0.8
+#         with:
+#           service-id: ${{ secrets.RENDER_SERVICE_ID }}
+#           api-key: ${{ secrets.RENDER_API_KEY }}
+
+#       - name: Check Deployment Response
+#         if: failure()
+#         run: |
+#           echo "❌ Deployment failed! Exiting..."
+#           exit 1
+
+#       - name: Confirm Deployment Success
+#         if: success()
+#         run: echo "✅ Deployment completed successfully!"
+#  -e PORT=${{ secrets.PORT }} \
+#             -e ORIGIN=${{ secrets.ORIGIN }} \
+#             -e NODE_ENV=${{ secrets.NODE_ENV }} \
+#             -e DB_URL=${{ secrets.DB_URL }} \
+#             -e CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }} \
+#             -e CLOUDINARY_KEY=${{ secrets.CLOUDINARY_KEY }} \
+#             -e CLOUDINARY_SECRET=${{ secrets.CLOUDINARY_SECRET }} \
+#             -e REDIS_URL=${{ secrets.REDIS_URL }} \
+#             -e ACTIVATION_SECRET=${{ secrets.ACTIVATION_SECRET }} \
+#             -e ACCESS_TOKEN_SIGN_IN=${{ secrets.ACCESS_TOKEN_SIGN_IN }} \
+#             -e REFRESH_TOKEN_SIGN_IN=${{ secrets.REFRESH_TOKEN_SIGN_IN }} \
+#             -e ACCESS_TOKEN_EXPIRE=${{ secrets.ACCESS_TOKEN_EXPIRE }} \
+#             -e REFRESH_TOKEN_EXPIRE=${{ secrets.REFRESH_TOKEN_EXPIRE }} \
+#             -e SMTP_HOST=${{ secrets.SMTP_HOST }} \
+#             -e SMTP_PORT=${{ secrets.SMTP_PORT }} \
+#             -e SMTP_SERVICE=${{ secrets.SMTP_SERVICE }} \
+#             -e SMTP_MAIL=${{ secrets.SMTP_MAIL }} \
+#             -e SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
+#             -e VDOCIPHER_API_SECRET=${{ secrets.VDOCIPHER_API_SECRET }} \
+#             -e STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
+#             -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
