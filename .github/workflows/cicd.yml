@@ -50,27 +50,7 @@ jobs:
         run: |
           docker run --rm \
             -e PORT=${{ secrets.PORT }} \
-            -e ORIGIN=${{ secrets.ORIGIN }} \
-            -e NODE_ENV=${{ secrets.NODE_ENV }} \
-            -e DB_URL=${{ secrets.DB_URL }} \
-            -e CLOUD_NAME=${{ secrets.CLOUD_NAME }} \
-            -e CLOUD_KEY=${{ secrets.CLOUD_KEY }} \
-            -e CLOUD_SECRET=${{ secrets.CLOUD_SECRET }} \
-            -e REDIS_URL=${{ secrets.REDIS_URL }} \
-            -e ACTIVATION_SECRET=${{ secrets.ACTIVATION_SECRET }} \
-            -e ACCESS_TOKEN_SIGN_IN=${{ secrets.ACCESS_TOKEN_SIGN_IN }} \
-            -e REFRESH_TOKEN_SIGN_IN=${{ secrets.REFRESH_TOKEN_SIGN_IN }} \
-            -e ACCESS_TOKEN_EXPIRE=${{ secrets.ACCESS_TOKEN_EXPIRE }} \
-            -e REFRESH_TOKEN_EXPIRE=${{ secrets.REFRESH_TOKEN_EXPIRE }} \
-            -e SMTP_HOST=${{ secrets.SMTP_HOST }} \
-            -e SMTP_PORT=${{ secrets.SMTP_PORT }} \
-            -e SMTP_SERVICE=${{ secrets.SMTP_SERVICE }} \
-            -e SMTP_MAIL=${{ secrets.SMTP_MAIL }} \
-            -e SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
-            -e VDOCIPHER_API_SECRET=${{ secrets.VDOCIPHER_API_SECRET }} \
-            -e STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }} \
-            -e STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }} \
-          e-learning-server
+            "e-learning-server"
 
       - name: Confirm Successful build
         if: success()
