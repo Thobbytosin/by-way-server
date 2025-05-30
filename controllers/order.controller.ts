@@ -15,9 +15,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-if (!process.env.STRIPE_SECRET_KEY) {
-  throw new Error("Stripe secret key is required");
-}
+// if (!process.env.STRIPE_SECRET_KEY) {
+//   throw new Error("Stripe secret key is required");
+// }
 
 // stripe docs
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);

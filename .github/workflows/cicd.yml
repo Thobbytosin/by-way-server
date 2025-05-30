@@ -66,6 +66,13 @@ jobs:
             echo "✅ RENDER_SERVICE_ID is set!"
           fi
 
+          if [[ -z "${{ secrets.STRIPE_SECRET_KEY }}" ]]; then
+            echo "❌ STRIPE_SECRET_KEY is missing!"
+            exit 1
+          else
+            echo "✅ STRIPE_SECRET_KEY is set!"
+          fi
+
       - name: Build Docker image
         run: docker build -t e-learning-server .
 
