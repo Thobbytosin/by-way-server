@@ -10,6 +10,7 @@ import notificationRouter from "./routes/notification.route";
 import analyticsRouter from "./routes/analytics.route";
 import layoutRouter from "./routes/layout.route";
 import { rateLimit } from "express-rate-limit";
+import mongoose from "mongoose";
 
 export const app = express();
 dotenv.config();
@@ -46,6 +47,13 @@ const limiter = rateLimit({
   standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
   // store: ... , // Redis, Memcached, etc. See below.
+});
+
+app.get("/api/v1/health", (req, res) => {
+  const dBReady = mongoose.connection.readyState === 1;
+  if (!dBReady) return res.status(500).json({ status: "Not OK" });
+
+  res.status(200).json({ status: "OK" });
 });
 
 // ROUTES

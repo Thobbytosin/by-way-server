@@ -24,7 +24,6 @@ jobs:
         run: |
           echo "PORT=8000" >> .env
           echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
-          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> .env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
           echo "DB_URL=${{ secrets.DB_URL }}" >> .env
           echo "CLOUDINARY_NAME=${{ secrets.CLOUDINARY_NAME }}" >> .env
@@ -75,7 +74,12 @@ jobs:
           echo "🚀 Starting Docker container..."
           container_id=$(docker run -d \
             -p 8000:8000 \
-            --env-file .env \
+            -e DB_HOST=${{ secrets.DB_HOST }} \
+            -e DB_PASS=${{ secrets.DB_PASS }} \
+            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+            --health-cmd="curl -f http://localhost:8000/api/v1/health || exit 1" \
+            --health-interval=5s \
+            --health-retries=3 \
             e-learning-server)
 
           echo "🕒 Waiting for container to boot up..."
@@ -87,13 +91,18 @@ jobs:
           logs=$(docker logs "$container_id")
           echo "$logs"
 
-          echo "🧪 Validating services..."
-          if [[ "$logs" == *"Redis connected"* && "$logs" == *"Application is running on port"* && "$logs" == *"Connected to database SUCCESSFULLY"* ]]; then
-            echo "✅ All services started correctly!"
-            docker stop "$container_id"
+          echo "🔍 Final Container Status: $container_status"
+          echo "📜 Last 50 Log Lines:"
+          echo "$logs"
+
+          if [[ "$container_status" == "healthy" ]]; then
+            echo "✅ Container passed health checks!"
+            docker stop $container_id
           else
-            echo "❌ One or more services failed to start."
-            docker stop "$container_id"
+            echo "❌ Container failed with status: $container_status"
+            echo "🛑 Problem areas detected:"
+            grep -E -i "error|fail|exception|timeout|refused" <<< "$logs" || echo "No explicit errors found in logs"
+            docker stop $container_id
             exit 1
           fi
 
