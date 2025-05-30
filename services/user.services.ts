@@ -1,11 +1,12 @@
 import { NextFunction, Response } from "express";
 import User from "../models/user.model";
-import { redis } from "../utils/redis";
+// import { redis } from "../utils/redis";
 import ErrorHandler from "../utils/errorHandler";
 
 // get user by id
 export const getUserId = async (res: Response, id: string) => {
-  const userJson = await redis.get(`user - ${id}`);
+  // const userJson = await redis.get(`user - ${id}`);
+  const userJson = false;
 
   if (userJson) {
     const user = JSON.parse(userJson);
@@ -51,7 +52,7 @@ export const updateUserRoleService = async (
 
   if (!user) return next(new ErrorHandler("User not found", 404));
 
-  await redis.set(`user - ${user.id}`, JSON.stringify(user));
+  // await redis.set(`user - ${user.id}`, JSON.stringify(user));
 
   res.status(200).json({ success: true, user });
 };

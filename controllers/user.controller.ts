@@ -12,7 +12,7 @@ import {
   refreshTokenOptions,
   sendToken,
 } from "../utils/jwt";
-import { redis } from "../utils/redis";
+// import { redis } from "../utils/redis";
 import {
   getALLUsersService,
   getAllAdminsService,
@@ -75,11 +75,11 @@ export const registerUser = catchAsyncError(
           activationToken: activationToken.token,
         });
       } catch (error: any) {
-        console.log(error);
+        // console.log(error);
         return next(new ErrorHandler(error.message, 400));
       }
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       return next(new ErrorHandler(error.name, 400));
     }
   }
@@ -201,7 +201,7 @@ export const logoutUser = catchAsyncError(
 
       const userId = (req.user._id as string) || "";
 
-      await redis.del(`user - ${userId}`);
+      // await redis.del(`user - ${userId}`);
 
       res.status(200).json({ success: true, message: "Logout successful" });
     } catch (error: any) {
@@ -226,12 +226,12 @@ export const updateAccessToken = catchAsyncError(
       if (!decoded)
         return next(new ErrorHandler("could not refresh token", 400));
 
-      const session = await redis.get(`user - ${decoded.id as string}`);
+      // const session = await redis.get(`user - ${decoded.id as string}`);
 
-      if (!session)
-        return next(new ErrorHandler("session not found / has expired", 404));
+      // if (!session)
+      //   return next(new ErrorHandler("session not found / has expired", 404));
 
-      const user = JSON.parse(session);
+      const user = req.user;
 
       const accessToken = jwt.sign(
         { id: user._id },
@@ -256,12 +256,12 @@ export const updateAccessToken = catchAsyncError(
       res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
 
       // this will help with cache maintenance to prevent redis from overload
-      await redis.set(
-        `user - ${user._id as string}`,
-        JSON.stringify(user),
-        "EX",
-        604800
-      ); // 7day expiry
+      // await redis.set(
+      //   `user - ${user._id as string}`,
+      //   JSON.stringify(user),
+      //   "EX",
+      //   604800
+      // ); // 7day expiry
 
       // res.status(200).json({ success: true, accessToken });
       next();
@@ -287,15 +287,15 @@ export const updateAccessTokenEveryPage = catchAsyncError(
       if (!decoded)
         return next(new ErrorHandler("could not refresh token", 400));
 
-      const session = await redis.get(`user - ${decoded.id as string}`);
+      // const session = await redis.get(`user - ${decoded.id as string}`);
 
-      if (!session)
-        return next(new ErrorHandler("session not found / has expired", 404));
+      // if (!session)
+      //   return next(new ErrorHandler("session not found / has expired", 404));
 
-      const user = JSON.parse(session);
+      const user = await User.findById(decoded.id);
 
       const accessToken = jwt.sign(
-        { id: user._id },
+        { id: user?._id },
         process.env.ACCESS_TOKEN_SIGN_IN as string,
         {
           expiresIn: "59m",
@@ -303,7 +303,7 @@ export const updateAccessTokenEveryPage = catchAsyncError(
       );
 
       const refreshToken = jwt.sign(
-        { id: user._id },
+        { id: user?._id },
         process.env.REFRESH_TOKEN_SIGN_IN as string,
         {
           expiresIn: "4d",
@@ -311,18 +311,20 @@ export const updateAccessTokenEveryPage = catchAsyncError(
       );
 
       // Update the user also whenever the token is updated
-      req.user = user;
+      if (user) {
+        req.user = user;
+      }
 
       res.cookie("access_Token", accessToken, accessTokenOptions);
       res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
 
       // this will help with cache maintenance to prevent redis from overload
-      await redis.set(
-        `user - ${user._id as string}`,
-        JSON.stringify(user),
-        "EX",
-        604800
-      ); // 7day expiry
+      // await redis.set(
+      //   `user - ${user._id as string}`,
+      //   JSON.stringify(user),
+      //   "EX",
+      //   604800
+      // ); // 7day expiry
 
       res.status(200).json({ success: true, accessToken });
     } catch (error: any) {
@@ -430,12 +432,12 @@ export const updateUserInfo = catchAsyncError(
 
       await user.save();
 
-      await redis.set(`user - ${userId}`, JSON.stringify(user));
+      // await redis.set(`user - ${userId}`, JSON.stringify(user));
 
       res.status(201).json({ success: true, user });
     } catch (error: any) {
-      console.log(error.message);
-      console.log(error.name);
+      // console.log(error.message);
+      // console.log(error.name);
       return next(new ErrorHandler(error.name, 400));
     }
   }
@@ -480,7 +482,7 @@ export const updatePassword = catchAsyncError(
 
       await user.save();
 
-      await redis.set(`user - ${userId}`, JSON.stringify(user));
+      // await redis.set(`user - ${userId}`, JSON.stringify(user));
 
       res.status(200).json({ success: true, user });
     } catch (error: any) {
@@ -561,7 +563,7 @@ export const updateProfilePicture = catchAsyncError(
           user.avatar.url = imageUrl || "";
           user.avatar.id = imageId || "";
 
-          await redis.set(`user - ${userId}`, JSON.stringify(user));
+          // await redis.set(`user - ${userId}`, JSON.stringify(user));
 
           await user.save();
         }
@@ -627,7 +629,7 @@ export const deleteUser = catchAsyncError(
     try {
       const { userId } = req.params;
 
-      console.log(userId);
+      // console.log(userId);
 
       const user = await User.findById(userId);
 
@@ -635,7 +637,7 @@ export const deleteUser = catchAsyncError(
 
       await user.deleteOne();
 
-      await redis.del(`user - ${userId}`);
+      // await redis.del(`user - ${userId}`);
 
       res
         .status(200)
@@ -692,10 +694,10 @@ export const markVideoAsViewed = catchAsyncError(
       const newUser = await User.findById(userId);
 
       //   update user to redis
-      await redis.set(
-        `user - ${newUser?._id as string}`,
-        JSON.stringify(newUser) as any
-      );
+      // await redis.set(
+      //   `user - ${newUser?._id as string}`,
+      //   JSON.stringify(newUser) as any
+      // );
 
       res.status(200).json({ success: true, user });
     } catch (error: any) {

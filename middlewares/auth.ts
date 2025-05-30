@@ -3,7 +3,8 @@ import catchAsyncError from "./catchAsyncErrors";
 import ErrorHandler from "../utils/errorHandler";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { redis } from "../utils/redis";
+import User from "../models/user.model";
+// import { redis } from "../utils/redis";
 
 dotenv.config();
 
@@ -22,21 +23,18 @@ export const isAuthenticated = catchAsyncError(
 
       if (!decoded) return next(new ErrorHandler("Invalid access token", 400));
 
-      const user = await redis.get(`user - ${decoded.id}`);
+      const user = await User.findById(decoded.id);
 
       if (!user)
         return next(new ErrorHandler("Please login to access this", 404));
 
-      req.user = JSON.parse(user);
+      req.user = user;
 
       return next();
     } catch (error: any) {
       return next(
         new ErrorHandler("Session has expired. Kindly refresh your page.", 404)
       );
-      // console.log("LOGIN ERROR", error);
-      // console.log("LOGIN ERROR", error.name);
-      // console.log("LOGIN ERROR", error.message);
     }
   }
 );

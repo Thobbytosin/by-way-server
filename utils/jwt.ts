@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-import { redis } from "./redis";
+// import { redis } from "./redis";
 import { IUser } from "../models/user.model";
 import { Response } from "express";
 
@@ -49,7 +49,7 @@ export const sendToken = async (
   const refreshToken = user.SignRefreshToken();
 
   //   upload session to redis
-  await redis.set(`user - ${user?._id as string}`, JSON.stringify(user) as any);
+  // await redis.set(`user - ${user?._id as string}`, JSON.stringify(user) as any);
 
   // parse environment variables to integrate fallback values
 

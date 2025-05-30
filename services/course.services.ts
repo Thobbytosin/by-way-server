@@ -1,7 +1,7 @@
 import { NextFunction, Response } from "express";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
 import Course from "../models/course.model";
-import { redis } from "../utils/redis";
+// import { redis } from "../utils/redis";
 import ErrorHandler from "../utils/errorHandler";
 
 // create course
@@ -13,7 +13,7 @@ export const createCourse = catchAsyncError(
     if (!course) return next(new ErrorHandler("Course not found", 404));
 
     // update redis
-    await redis.set(`course - ${course._id}`, JSON.stringify(course));
+    // await redis.set(`course - ${course._id}`, JSON.stringify(course));
 
     // for redis update all courses
     const courses = await Course.find().select(
@@ -23,7 +23,7 @@ export const createCourse = catchAsyncError(
     if (!courses) return next(new ErrorHandler("Course not found", 404));
 
     // update all courses in redis too
-    await redis.set("allCourses", JSON.stringify(courses));
+    // await redis.set("allCourses", JSON.stringify(courses));
 
     res.status(201).json({ success: true, message: "Course created", course });
   }

@@ -9,7 +9,7 @@ import ejs from "ejs";
 import path from "path";
 import sendMail from "../utils/sendMail";
 import Notification from "../models/notification.model";
-import { redis } from "../utils/redis";
+// import { redis } from "../utils/redis";
 import Stripe from "stripe";
 import dotenv from "dotenv";
 
@@ -132,13 +132,13 @@ export const createOrder = catchAsyncError(
         }
       );
 
-      const newUser = await User.findById(user._id);
+      // const newUser = await User.findById(user._id);
 
       //   update user to redis
-      await redis.set(
-        `user - ${newUser?._id as string}`,
-        JSON.stringify(newUser) as any
-      );
+      // await redis.set(
+      //   `user - ${newUser?._id as string}`,
+      //   JSON.stringify(newUser) as any
+      // );
 
       //   create notification
       await Notification.create({
@@ -153,7 +153,7 @@ export const createOrder = catchAsyncError(
 
       // update course redis
 
-      await redis.set(`course - ${courseId}`, JSON.stringify(course));
+      // await redis.set(`course - ${courseId}`, JSON.stringify(course));
 
       // and update all courses
       const courses = await Course.find().select(
@@ -163,7 +163,7 @@ export const createOrder = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses redis
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       res.status(201).json({ success: true, order });
     } catch (error: any) {
