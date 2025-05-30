@@ -91,31 +91,41 @@ jobs:
             --health-cmd="curl -f http://localhost:8000/api/v1/health || exit 1" \
             --health-interval=5s \
             --health-retries=3 \
+            --health-start-period=5s \
+            --name temp_elearning_container \
             e-learning-server)
 
           echo "🕒 Waiting for container to boot up..."
-          sleep 10
+
+          for i in {1..6}; do
+            container_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_id")
+            echo "Health status: $container_status"
+            if [ "$container_status" == "healthy" ]; then
+              break
+            fi
+            sleep 5
+          done
 
           echo "📦 Container ID: $container_id"
+          echo "🔍 Final Container Health Status: $container_status"
 
           echo "🔍 Checking logs..."
-          logs=$(docker logs "$container_id")
+          logs=$(docker logs "$container_id" 2>&1)
           echo "$logs"
 
-          echo "🔍 Final Container Status: $container_status"
-          echo "📜 Last 50 Log Lines:"
-          echo "$logs"
-
-          if [[ "$container_status" == "healthy" ]]; then
+          if [ "$container_status" == "healthy" ]; then
             echo "✅ Container passed health checks!"
-            docker stop $container_id
           else
             echo "❌ Container failed with status: $container_status"
             echo "🛑 Problem areas detected:"
-            grep -E -i "error|fail|exception|timeout|refused" <<< "$logs" || echo "No explicit errors found in logs"
-            docker stop $container_id
+            grep -Ei "error|fail|exception|timeout|refused" <<< "$logs" || echo "No explicit errors found in logs"
+            docker stop "$container_id"
+            docker rm "$container_id"
             exit 1
           fi
+
+          docker stop "$container_id"
+          docker rm "$container_id"
 
       - name: Confirm Successful build
         if: success()
