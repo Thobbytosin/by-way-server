@@ -8,7 +8,7 @@ import {
   getAllCoursesService,
 } from "../services/course.services";
 import Course from "../models/course.model";
-import { redis } from "../utils/redis";
+// import { redis } from "../utils/redis";
 import { isValidObjectId } from "mongoose";
 import path from "path";
 import ejs from "ejs";
@@ -223,7 +223,7 @@ export const editCourse = catchAsyncError(
       if (!course) return next(new ErrorHandler("Course not found", 404));
 
       // update redis
-      await redis.set(`course - ${courseId}`, JSON.stringify(course));
+      // await redis.set(`course - ${courseId}`, JSON.stringify(course));
 
       // for redis update
       const courses = await Course.find().select(
@@ -233,7 +233,7 @@ export const editCourse = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses in redis too
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       res.status(201).json({
         success: true,
@@ -254,7 +254,8 @@ export const getSingleCourse = catchAsyncError(
     try {
       const courseId = req.params.course_id;
 
-      const isCacheExists = await redis.get(`course - ${courseId}`);
+      // const isCacheExists = await redis.get(`course - ${courseId}`);
+      const isCacheExists = false;
 
       if (isCacheExists) {
         const course = JSON.parse(isCacheExists);
@@ -264,15 +265,16 @@ export const getSingleCourse = catchAsyncError(
         const course = await Course.findById(courseId).select(
           "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
         );
+        // console.log(course);
 
         if (!course) return next(new ErrorHandler("Course not found", 404));
 
-        await redis.set(`course - ${courseId}`, JSON.stringify(course));
+        // await redis.set(`course - ${courseId}`, JSON.stringify(course));
 
         res.status(200).json({ success: true, course });
       }
     } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
+      return next(new ErrorHandler(error.messsage, 400));
     }
   }
 );
@@ -283,7 +285,8 @@ export const getSingleCourse = catchAsyncError(
 export const getAllCourses = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const isCacheExists = await redis.get("allCourses");
+      // const isCacheExists = await redis.get("allCourses");
+      const isCacheExists = false;
 
       if (isCacheExists) {
         const courses = JSON.parse(isCacheExists);
@@ -296,7 +299,7 @@ export const getAllCourses = catchAsyncError(
 
         if (!courses) return next(new ErrorHandler("Course not found", 404));
 
-        await redis.set("allCourses", JSON.stringify(courses));
+        // await redis.set("allCourses", JSON.stringify(courses));
 
         res.status(200).json({ success: true, courses });
       }
@@ -394,7 +397,7 @@ export const addQuestion = catchAsyncError(
       const newCourse = await Course.findById(courseId);
 
       // update redis
-      await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
+      // await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
 
       // for redis update
       const courses = await Course.find().select(
@@ -404,7 +407,7 @@ export const addQuestion = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses in redis too
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       res.status(200).json({ success: true, course });
     } catch (error: any) {
@@ -465,7 +468,7 @@ export const addAnswer = catchAsyncError(
       const newCourse = await Course.findById(courseId);
 
       // update redis
-      await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
+      // await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
 
       // for redis update  courses
       const courses = await Course.find().select(
@@ -475,7 +478,7 @@ export const addAnswer = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses in redis too
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       // send email notification to user
       if (req.user?._id === question.user._id) {
@@ -520,7 +523,7 @@ export const addAnswer = catchAsyncError(
 
       res.status(200).json({ success: true, course });
     } catch (error: any) {
-      console.log(error);
+      // console.log(error);
       return next(new ErrorHandler(error.name, 400));
     }
   }
@@ -540,7 +543,7 @@ export const addReview = catchAsyncError(
     try {
       const userId = req.user._id;
 
-      console.log(userId);
+      // console.log(userId);
 
       // const userCourseList = req.user?.courses;
 
@@ -594,10 +597,10 @@ export const addReview = catchAsyncError(
       });
 
       // REDIS UPDATE
-      const newCourse = await Course.findById(courseId);
+      // const newCourse = await Course.findById(courseId);
 
       // update redis
-      await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
+      // await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
 
       // for redis update
       const courses = await Course.find().select(
@@ -607,7 +610,7 @@ export const addReview = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses in redis too
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       // update user reviewed course
       const user = await User.updateOne(
@@ -624,10 +627,10 @@ export const addReview = catchAsyncError(
       const newUser = await User.findById(userId);
 
       //   update user to redis
-      await redis.set(
-        `user - ${newUser?._id as string}`,
-        JSON.stringify(newUser) as any
-      );
+      // await redis.set(
+      //   `user - ${newUser?._id as string}`,
+      //   JSON.stringify(newUser) as any
+      // );
 
       res.status(200).json({ success: true, course });
     } catch (error: any) {
@@ -676,7 +679,7 @@ export const addReplyToReview = catchAsyncError(
       const newCourse = await Course.findById(courseId);
 
       // update redis
-      await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
+      // await redis.set(`course - ${courseId}`, JSON.stringify(newCourse));
 
       // for redis update
       const courses = await Course.find().select(
@@ -686,7 +689,7 @@ export const addReplyToReview = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses in redis too
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       res.status(200).json({ success: true, course });
     } catch (error: any) {
@@ -722,7 +725,7 @@ export const deleteCourse = catchAsyncError(
 
       await course.deleteOne();
 
-      await redis.del(`course - ${courseId}`);
+      // await redis.del(`course - ${courseId}`);
 
       // for redis update
       const courses = await Course.find().select(
@@ -732,7 +735,7 @@ export const deleteCourse = catchAsyncError(
       if (!courses) return next(new ErrorHandler("Course not found", 404));
 
       // update all courses in redis too
-      await redis.set("allCourses", JSON.stringify(courses));
+      // await redis.set("allCourses", JSON.stringify(courses));
 
       res
         .status(200)

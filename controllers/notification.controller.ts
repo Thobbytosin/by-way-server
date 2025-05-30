@@ -59,6 +59,11 @@ cron.schedule("0 0 0 * * *", async () => {
     createdAt: { $lt: thirtyDaysAgo },
   });
 });
+// const doThis = () => {
+//   console.log("Remind me");
+// };
+
+// cron.schedule("0 0 0 * * *", doThis);
 
 // 1 assume the created date is 1
 // and i want to delete after 30 days

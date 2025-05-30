@@ -136,7 +136,7 @@ export const editLayout = catchAsyncError(
             folder: folderPath,
           },
           async (error: any, result) => {
-            console.log(error);
+            // console.log(error);
             if (error) return next(new ErrorHandler(error.message, 400));
           }
         );
@@ -210,7 +210,7 @@ export const editLayout = catchAsyncError(
         .status(200)
         .json({ success: true, message: "Layout created successfully" });
     } catch (error: any) {
-      console.log("ERRO!!!:", error);
+      // console.log("ERRO!!!:", error);
       return next(new ErrorHandler(error.name, 400));
     }
   }
