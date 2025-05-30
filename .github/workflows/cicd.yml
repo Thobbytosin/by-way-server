@@ -22,7 +22,7 @@ jobs:
 
       - name: Create .env file
         run: |
-          echo "PORT=8000" >> .env
+          echo "PORT==${{ secrets.PORT }}" >> .env
           echo "ORIGIN=${{ secrets.ORIGIN }}" >> .env
           echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> .env
           echo "DB_URL=${{ secrets.DB_URL }}" >> .env
@@ -71,6 +71,13 @@ jobs:
             exit 1
           else
             echo "✅ STRIPE_SECRET_KEY is set!"
+          fi
+
+          if [[ -z "${{ secrets.PORT}}" ]]; then
+            echo "❌ PORT is missing!"
+            exit 1
+          else
+            echo "✅ PORT is set!"
           fi
 
       - name: Build Docker image
