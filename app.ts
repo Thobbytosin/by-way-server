@@ -51,9 +51,12 @@ const limiter = rateLimit({
 
 app.get("/api/v1/health", (req, res) => {
   const dBReady = mongoose.connection.readyState === 1;
-  if (!dBReady) return res.status(500).json({ status: "Not OK" });
 
-  res.status(200).json({ status: "OK" });
+  res.status(200).json({
+    status: "OK",
+    dbConnected: dBReady,
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // ROUTES
