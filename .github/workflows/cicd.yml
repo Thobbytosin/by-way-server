@@ -87,13 +87,8 @@ jobs:
         run: |
           echo "🚀 Starting Docker container..."
           container_id=$(docker run -d \
-            -p 8000:8000 \
-            -e DB_HOST=${{ secrets.DB_HOST }} \
-            -e DB_PASS=${{ secrets.DB_PASS }} \
-            -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-            --health-cmd="curl -f http://localhost:8000/api/v1/health || exit 1" \
-            --health-interval=5s \
-            --health-retries=3 \
+            --health-cmd="curl -fs http://localhost:8000/api/v1/health" \ # No exit 1 needed
+            --health-interval=2s \
             e-learning-server)
 
           echo "🕒 Waiting for container to boot up..."
