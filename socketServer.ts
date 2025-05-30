@@ -5,7 +5,7 @@ export const initSocketServer = (server: http.Server) => {
   const io = new SocketIOServer(server);
 
   io.on("connection", (socket) => {
-    console.log("A connection has been established");
+    // console.log("A connection has been established");
 
     // listen for incoming connections from the frontend
     socket.on("notification", (data) => {
@@ -15,7 +15,7 @@ export const initSocketServer = (server: http.Server) => {
 
     // when the connection is disconnected
     socket.on("disconnect", () => {
-      console.log("connection disconnected");
+      // console.log("connection disconnected");
     });
   });
 };
