@@ -53,11 +53,14 @@ const limiter = rateLimit({
 app.get("/api/v1/health", (req, res) => {
   const dBReady = mongoose.connection.readyState === 1;
 
-  res.status(200).json({
-    status: "OK",
-    dbConnected: dBReady,
-    timestamp: new Date().toISOString(),
-  });
+  if (!dBReady) {
+    return res.status(503).json({
+      status: "Service Unavailable",
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  res.status(200).json({ status: "OK" });
 });
 
 app.use(responseFormatter);
