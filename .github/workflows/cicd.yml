@@ -52,7 +52,7 @@ jobs:
           echo "🔍 Checking MongoDB Atlas connectivity..."
           node <<EOF
           const mongoose = require('mongoose');
-          mongoose.connect(secrets.DB_URL, {
+          mongoose.connect(process.env.DB_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
           }).then(() => {
@@ -63,6 +63,8 @@ jobs:
             process.exit(1);
           });
           EOF
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
 
       - name: Run tests
         run: echo "Skipping tests for now"
