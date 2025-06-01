@@ -14,7 +14,7 @@ interface ITokenOptions {
 
 const accessTokenExpire = Number(process.env.ACCESS_TOKEN_EXPIRE) || 59;
 
-const refreshTokenExpire = Number(process.env.REFRESH_TOKEN_EXPIRE) || 5;
+const refreshTokenExpire = Number(process.env.REFRESH_TOKEN_EXPIRE) || 7;
 
 const isProduction = process.env.NODE_ENV === "production";
 
