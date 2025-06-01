@@ -63,6 +63,8 @@ jobs:
             process.exit(1);
           });
           EOF
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
 
       - name: Run tests
         run: echo "Skipping tests for now"
