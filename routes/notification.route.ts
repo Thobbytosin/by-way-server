@@ -3,23 +3,20 @@ import {
   getAllNotifications,
   updateNotificationStatus,
 } from "../controllers/notification.controller";
-import { authorizeRoles, isAuthenticated } from "../middlewares/auth";
-import { updateAccessToken } from "../controllers/user.controller";
+import { authorizeRoles, isUserAuthenticated } from "../middlewares/auth";
 
 const notificationRouter = Router();
 
 notificationRouter.get(
   "/get-all-notifications",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   getAllNotifications
 );
 
 notificationRouter.put(
   "/update-notification-status/:id",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   updateNotificationStatus
 );

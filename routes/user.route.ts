@@ -9,17 +9,17 @@ import {
   loginUser,
   logoutUser,
   markVideoAsViewed,
+  refreshTokens,
   registerUser,
   socialAuth,
-  updateAccessToken,
-  updateAccessTokenEveryPage,
   updatePassword,
   updateProfilePicture,
   updateUserInfo,
   updateUserRole,
 } from "../controllers/user.controller";
-import { authorizeRoles, isAuthenticated } from "../middlewares/auth";
+import { authorizeRoles, isUserAuthenticated } from "../middlewares/auth";
 import { fileParser } from "../middlewares/fileParser";
+import { updateTokens } from "../middlewares/updateTokens";
 
 const userRouter = express.Router();
 
@@ -33,38 +33,33 @@ userRouter.post("/activate-user", activateUser);
 userRouter.post("/login", loginUser);
 
 // logout user
-userRouter.get("/logout", isAuthenticated, logoutUser);
+userRouter.get("/logout", isUserAuthenticated, logoutUser);
 
-// refresh access token on each page (to keep user logged in)
-userRouter.get("/refresh", updateAccessTokenEveryPage);
+// refresh  tokens  (to keep user logged in)
+userRouter.get("/refresh-tokens", updateTokens, refreshTokens);
 
 // get user profile
-userRouter.get("/me", updateAccessToken, isAuthenticated, getUserInfo);
+userRouter.get("/me", isUserAuthenticated, getUserInfo);
 
 // login user with social accounts
 userRouter.post("/social-auth", socialAuth);
 
 // update user profile (name and email)
-userRouter.put(
-  "/update-user-info",
-  updateAccessToken,
-  isAuthenticated,
-  updateUserInfo
-);
+userRouter.put("/update-user-info", isUserAuthenticated, updateUserInfo);
 
 // update user password
 userRouter.put(
   "/update-user-password",
-  updateAccessToken,
-  isAuthenticated,
+
+  isUserAuthenticated,
   updatePassword
 );
 
 // update user profile image
 userRouter.put(
   "/update-profile-picture",
-  updateAccessToken,
-  isAuthenticated,
+
+  isUserAuthenticated,
   fileParser,
   updateProfilePicture
 );
@@ -72,8 +67,7 @@ userRouter.put(
 // get all users (admin only)
 userRouter.get(
   "/get-all-users",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   getAllUsers
 );
@@ -81,16 +75,16 @@ userRouter.get(
 // get all admins
 userRouter.get(
   "/get-all-admins",
-  updateAccessToken,
-  isAuthenticated,
+
+  isUserAuthenticated,
   getAllAdmins
 );
 
 // update user role (admin only)
 userRouter.put(
   "/update-user-role",
-  updateAccessToken,
-  isAuthenticated,
+
+  isUserAuthenticated,
   authorizeRoles("admin"),
   updateUserRole
 );
@@ -98,8 +92,8 @@ userRouter.put(
 // delete user account (admin only)
 userRouter.delete(
   "/delete-user/:userId",
-  updateAccessToken,
-  isAuthenticated,
+
+  isUserAuthenticated,
   authorizeRoles("admin"),
   deleteUser
 );
@@ -107,11 +101,11 @@ userRouter.delete(
 // update userVideoViewed
 userRouter.put(
   "/update-user-videos-viewed",
-  updateAccessToken,
-  isAuthenticated,
+
+  isUserAuthenticated,
   markVideoAsViewed
 );
 
-userRouter.get("/get-users-latest", getAllUsersLatestInfo);
+userRouter.get("/get-users-list", getAllUsersLatestInfo);
 
 export default userRouter;

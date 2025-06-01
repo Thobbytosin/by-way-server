@@ -11,6 +11,7 @@ import analyticsRouter from "./routes/analytics.route";
 import layoutRouter from "./routes/layout.route";
 import { rateLimit } from "express-rate-limit";
 import mongoose from "mongoose";
+import responseFormatter from "./middlewares/responseFormatter";
 
 export const app = express();
 dotenv.config();
@@ -58,6 +59,8 @@ app.get("/api/v1/health", (req, res) => {
     timestamp: new Date().toISOString(),
   });
 });
+
+app.use(responseFormatter);
 
 // ROUTES
 app.use("/api/v1", userRouter);

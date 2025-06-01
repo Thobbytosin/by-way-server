@@ -1,26 +1,23 @@
 import { Router } from "express";
-import { authorizeRoles, isAuthenticated } from "../middlewares/auth";
+import { authorizeRoles, isUserAuthenticated } from "../middlewares/auth";
 import {
   createLayout,
   editLayout,
   getLayoutByType,
 } from "../controllers/layout.controller";
-import { updateAccessToken } from "../controllers/user.controller";
 
 const layoutRouter = Router();
 
 layoutRouter.post(
   "/create-layout",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   createLayout
 );
 
 layoutRouter.put(
   "/edit-layout",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   editLayout
 );

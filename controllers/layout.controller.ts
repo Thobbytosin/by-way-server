@@ -226,7 +226,7 @@ export const getLayoutByType = catchAsyncError(
 
       const layout = await Layout.findOne({ type });
 
-      res.status(200).json({ success: true, layout });
+      res.apiSuccess(layout, `${type} fetched`);
       //
     } catch (error: any) {
       return next(new ErrorHandler(error.name, 400));

@@ -211,129 +211,6 @@ export const logoutUser = catchAsyncError(
 );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// update access token : MIDDLEWARE ONLY
-
-export const updateAccessToken = catchAsyncError(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { refresh_Token } = req.cookies;
-
-      const decoded = jwt.verify(
-        refresh_Token,
-        process.env.REFRESH_TOKEN_SIGN_IN as string
-      ) as JwtPayload;
-
-      if (!decoded)
-        return next(new ErrorHandler("could not refresh token", 400));
-
-      // const session = await redis.get(`user - ${decoded.id as string}`);
-
-      // if (!session)
-      //   return next(new ErrorHandler("session not found / has expired", 404));
-
-      const user = req.user;
-
-      const accessToken = jwt.sign(
-        { id: user._id },
-        process.env.ACCESS_TOKEN_SIGN_IN as string,
-        {
-          expiresIn: "59m",
-        }
-      );
-
-      const refreshToken = jwt.sign(
-        { id: user._id },
-        process.env.REFRESH_TOKEN_SIGN_IN as string,
-        {
-          expiresIn: "4d",
-        }
-      );
-
-      // Update the user also whenever the token is updated
-      req.user = user;
-
-      res.cookie("access_Token", accessToken, accessTokenOptions);
-      res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
-
-      // this will help with cache maintenance to prevent redis from overload
-      // await redis.set(
-      //   `user - ${user._id as string}`,
-      //   JSON.stringify(user),
-      //   "EX",
-      //   604800
-      // ); // 7day expiry
-
-      // res.status(200).json({ success: true, accessToken });
-      next();
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
-  }
-);
-
-////////////////////////////////////////////////////////////////////////////////////////////////
-// update access token
-
-export const updateAccessTokenEveryPage = catchAsyncError(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { refresh_Token } = req.cookies;
-
-      const decoded = jwt.verify(
-        refresh_Token,
-        process.env.REFRESH_TOKEN_SIGN_IN as string
-      ) as JwtPayload;
-
-      if (!decoded)
-        return next(new ErrorHandler("could not refresh token", 400));
-
-      // const session = await redis.get(`user - ${decoded.id as string}`);
-
-      // if (!session)
-      //   return next(new ErrorHandler("session not found / has expired", 404));
-
-      const user = await User.findById(decoded.id);
-
-      const accessToken = jwt.sign(
-        { id: user?._id },
-        process.env.ACCESS_TOKEN_SIGN_IN as string,
-        {
-          expiresIn: "59m",
-        }
-      );
-
-      const refreshToken = jwt.sign(
-        { id: user?._id },
-        process.env.REFRESH_TOKEN_SIGN_IN as string,
-        {
-          expiresIn: "4d",
-        }
-      );
-
-      // Update the user also whenever the token is updated
-      if (user) {
-        req.user = user;
-      }
-
-      res.cookie("access_Token", accessToken, accessTokenOptions);
-      res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
-
-      // this will help with cache maintenance to prevent redis from overload
-      // await redis.set(
-      //   `user - ${user._id as string}`,
-      //   JSON.stringify(user),
-      //   "EX",
-      //   604800
-      // ); // 7day expiry
-
-      res.status(200).json({ success: true, accessToken });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
-  }
-);
-
-////////////////////////////////////////////////////////////////////////////////////////////////
 // get user information
 
 export const getUserInfo = catchAsyncError(
@@ -361,7 +238,7 @@ export const socialAuth = catchAsyncError(
     try {
       const { name, email, avatar } = req.body as ISocialAuthBody;
 
-      if (!name || !email)
+      if (!name || !email || name.trim() === "" || email.trim() === "")
         return next(new ErrorHandler("Please provide name and email", 400));
 
       const user = await User.findOne({ email });
@@ -659,7 +536,7 @@ export const getAllUsersLatestInfo = catchAsyncError(
 
       if (!users) return next(new ErrorHandler("User not found", 404));
 
-      res.status(200).json({ success: true, users });
+      res.apiSuccess(users, "Users list fetched");
     } catch (error: any) {
       return next(new ErrorHandler(error.name, 400));
     }
@@ -703,5 +580,23 @@ export const markVideoAsViewed = catchAsyncError(
     } catch (error: any) {
       return next(new ErrorHandler(error.name, 400));
     }
+  }
+);
+
+// REFRESH TOKENS
+export const refreshTokens = catchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    // accessToken expires in
+    const accessTokenExpiresAt = new Date(
+      Date.now() + accessTokenOptions.maxAge
+    ).getTime();
+
+    res.status(200).json({
+      success: true,
+      message: "Tokens Refreshed",
+      expiresAt: accessTokenExpiresAt,
+    });
   }
 );

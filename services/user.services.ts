@@ -11,11 +11,11 @@ export const getUserId = async (res: Response, id: string) => {
   if (userJson) {
     const user = JSON.parse(userJson);
 
-    res.status(200).json({ success: true, user });
+    res.apiSuccess(user, "User fetched");
   } else {
     const user = await User.findById(id);
 
-    res.status(200).json({ success: true, user });
+    res.apiSuccess(user, "User fetched");
   }
 };
 

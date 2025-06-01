@@ -42,6 +42,7 @@ jobs:
           echo "VDOCIPHER_API_SECRET=${{ secrets.VDOCIPHER_API_SECRET }}" >> .env
           echo "STRIPE_PUBLISHABLE_KEY=${{ secrets.STRIPE_PUBLISHABLE_KEY }}" >> .env
           echo "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" >> .env
+          echo "LOGGED_IN_TOKEN=${{ secrets.LOGGED_IN_TOKEN }}" >> .env
 
       - name: Install dependencies
         run: npm install
