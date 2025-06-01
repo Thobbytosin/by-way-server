@@ -50,7 +50,13 @@ const limiter = rateLimit({
   // store: ... , // Redis, Memcached, etc. See below.
 });
 
-app.get("/api/v1/health", (req, res) => {
+app.get("/api/v1/health", (_, res) => {
+  res.status(200).json({
+    status: "OK",
+  });
+});
+
+app.get("/api/v1/ui-health", (_, res) => {
   const dBReady = mongoose.connection.readyState === 1;
 
   if (!dBReady) {
