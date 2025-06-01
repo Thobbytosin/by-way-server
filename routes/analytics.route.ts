@@ -1,34 +1,30 @@
 import { Router } from "express";
-import { authorizeRoles, isAuthenticated } from "../middlewares/auth";
+import { authorizeRoles, isUserAuthenticated } from "../middlewares/auth";
 import {
   getCourseAnalytics,
   getOrderAnalytics,
   getUserAnalytics,
 } from "../controllers/analytics.controller";
-import { updateAccessToken } from "../controllers/user.controller";
 
 const analyticsRouter = Router();
 
 analyticsRouter.get(
   "/get-users-analytics",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   getUserAnalytics
 );
 
 analyticsRouter.get(
   "/get-courses-analytics",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   getCourseAnalytics
 );
 
 analyticsRouter.get(
   "/get-orders-analytics",
-  updateAccessToken,
-  isAuthenticated,
+  isUserAuthenticated,
   authorizeRoles("admin"),
   getOrderAnalytics
 );

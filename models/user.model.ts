@@ -29,7 +29,6 @@ export interface IUser extends Document {
     url: string;
   };
   role: string;
-  emailVerified: boolean;
   isVerified: boolean;
   courses: Array<{ courseId: string }>;
   comparePassword: (password: string) => Promise<boolean>;
@@ -107,7 +106,7 @@ userSchema.methods.SignAccessToken = function () {
 // sign Refresh token
 userSchema.methods.SignRefreshToken = function () {
   return jwt.sign({ id: this._id }, process.env.REFRESH_TOKEN_SIGN_IN || "", {
-    expiresIn: "4d",
+    expiresIn: "7d",
   });
 };
 
