@@ -47,6 +47,23 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Check MongoDB Atlas connectivity
+        run: |
+          echo "🔍 Checking MongoDB Atlas connectivity..."
+          node <<EOF
+          const mongoose = require('mongoose');
+          mongoose.connect(process.env.DB_URL, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+          }).then(() => {
+            console.log("✅ Successfully connected to MongoDB Atlas.");
+            process.exit(0);
+          }).catch((err) => {
+            console.error("❌ MongoDB Atlas connection failed:", err.message);
+            process.exit(1);
+          });
+          EOF
+
       - name: Run tests
         run: echo "Skipping tests for now"
 
