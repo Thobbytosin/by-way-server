@@ -58,11 +58,12 @@ app.get("/api/v1/health", (_, res) => {
 
 app.get("/api/v1/ui-health", (_, res) => {
   const dBReady = mongoose.connection.readyState === 1;
+  console.log(dBReady);
 
   if (!dBReady) {
     return res.status(503).json({
-      status: "Service Unavailable",
-      timestamp: new Date().toISOString(),
+      success: false,
+      message: "Database Network Error",
     });
   }
 

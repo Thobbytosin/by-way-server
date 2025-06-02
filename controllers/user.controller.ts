@@ -36,51 +36,45 @@ interface IRegistration {
 
 export const registerUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
+    const { name, email, password } = req.body as IRegistration;
+
+    const isEmailExists = await User.findOne({ email });
+
+    if (isEmailExists)
+      return next(new ErrorHandler("Email already exists", 400));
+
+    const user: IRegistration = {
+      name,
+      email,
+      password,
+    };
+
+    const activationToken = createActivationToken(user);
+
+    const activationCode = activationToken.activationCode;
+
+    const data = { user: { name: user.name }, activationCode };
+
+    const html = await ejs.renderFile(
+      path.join(__dirname, "../mails/activation-mail.ejs"),
+      data
+    );
+
     try {
-      const { name, email, password } = req.body as IRegistration;
+      await sendMail({
+        email: user.email,
+        subject: "Activate your account",
+        template: "activation-mail.ejs",
+        data,
+      });
 
-      const isEmailExists = await User.findOne({ email });
-
-      if (isEmailExists)
-        return next(new ErrorHandler("Email already exists", 400));
-
-      const user: IRegistration = {
-        name,
-        email,
-        password,
-      };
-
-      const activationToken = createActivationToken(user);
-
-      const activationCode = activationToken.activationCode;
-
-      const data = { user: { name: user.name }, activationCode };
-
-      const html = await ejs.renderFile(
-        path.join(__dirname, "../mails/activation-mail.ejs"),
-        data
+      res.apiSuccess(
+        null,
+        `Please check your email: ${user.email} to activate your account`
       );
-
-      try {
-        await sendMail({
-          email: user.email,
-          subject: "Activate your account",
-          template: "activation-mail.ejs",
-          data,
-        });
-
-        res.status(201).json({
-          success: true,
-          message: `Please check your email: ${user.email} to activate your account`,
-          activationToken: activationToken.token,
-        });
-      } catch (error: any) {
-        // console.log(error);
-        return next(new ErrorHandler(error.message, 400));
-      }
     } catch (error: any) {
       // console.log(error);
-      return next(new ErrorHandler(error.name, 400));
+      return next(new ErrorHandler(error.message, 400));
     }
   }
 );
@@ -158,34 +152,30 @@ interface ILoginRequest {
 
 export const loginUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { email, password } = req.body as ILoginRequest;
+    const { email, password } = req.body as ILoginRequest;
 
-      if (!email || !password)
-        return next(
-          new ErrorHandler("Please enter your email and password", 400)
-        );
+    if (!email || !password)
+      return next(
+        new ErrorHandler("Please enter your email and password", 400)
+      );
 
-      const user = await User.findOne({ email }).select("+password");
+    const user = await User.findOne({ email }).select("+password");
 
-      if (!user)
-        return next(new ErrorHandler("Invalid username or password", 404));
+    if (!user)
+      return next(new ErrorHandler("Invalid username or password", 404));
 
-      const isPasswordMatch = await user.comparePassword(password);
+    const isPasswordMatch = await user.comparePassword(password);
 
-      if (!isPasswordMatch)
-        return next(new ErrorHandler("Invalid credentials", 404));
+    if (!isPasswordMatch)
+      return next(new ErrorHandler("Invalid credentials", 404));
 
-      // to avoid sending password
-      const userr = await User.findOne({ email });
+    // to avoid sending password
+    const userr = await User.findOne({ email });
 
-      if (!userr)
-        return next(new ErrorHandler("Invalid username or password", 404));
+    if (!userr)
+      return next(new ErrorHandler("Invalid username or password", 404));
 
-      sendToken(userr, 200, res);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    sendToken(userr, 200, res);
   }
 );
 
@@ -194,19 +184,11 @@ export const loginUser = catchAsyncError(
 
 export const logoutUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      res.cookie("access_Token", "", { maxAge: 1 });
+    res.clearCookie("access_Token");
+    res.clearCookie("refresh_Token");
+    res.clearCookie("_can_logged_t");
 
-      res.cookie("refresh_Token", "", { maxAge: 1 });
-
-      const userId = (req.user._id as string) || "";
-
-      // await redis.del(`user - ${userId}`);
-
-      res.status(200).json({ success: true, message: "Logout successful" });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(null, "Logout successful");
   }
 );
 
@@ -215,12 +197,8 @@ export const logoutUser = catchAsyncError(
 
 export const getUserInfo = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user?._id as any;
-      getUserId(res, userId);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    const userId = req.user?._id as any;
+    getUserId(res, userId);
   }
 );
 
@@ -285,38 +263,32 @@ interface IUpdateUserInfo {
 
 export const updateUserInfo = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { name, email } = req.body as IUpdateUserInfo;
+    const { name, email } = req.body as IUpdateUserInfo;
 
-      const userId = req.user?._id as any;
+    const userId = req.user?._id as any;
 
-      const user = await User.findById(userId);
+    const user = await User.findById(userId);
 
-      if (!user) return next(new ErrorHandler("User not found", 404));
+    if (!user) return next(new ErrorHandler("User not found", 404));
 
-      if (email) {
-        const isEmailExists = await User.findOne({ email });
+    if (email) {
+      const isEmailExists = await User.findOne({ email });
 
-        if (isEmailExists)
-          return next(new ErrorHandler("Email already exists", 406));
+      if (isEmailExists)
+        return next(new ErrorHandler("Email already exists", 406));
 
-        user.email = email;
-      }
-
-      if (name) {
-        user.name = name;
-      }
-
-      await user.save();
-
-      // await redis.set(`user - ${userId}`, JSON.stringify(user));
-
-      res.status(201).json({ success: true, user });
-    } catch (error: any) {
-      // console.log(error.message);
-      // console.log(error.name);
-      return next(new ErrorHandler(error.name, 400));
+      user.email = email;
     }
+
+    if (name) {
+      user.name = name;
+    }
+
+    await user.save();
+
+    // await redis.set(`user - ${userId}`, JSON.stringify(user));
+
+    res.apiSuccess(null, "Profile updated", 201);
   }
 );
 
@@ -361,7 +333,7 @@ export const updatePassword = catchAsyncError(
 
       // await redis.set(`user - ${userId}`, JSON.stringify(user));
 
-      res.status(200).json({ success: true, user });
+      res.apiSuccess(null, "Password updated");
     } catch (error: any) {
       return next(new ErrorHandler(error.name, 400));
     }
@@ -377,78 +349,74 @@ interface IUpdateProfilePicture {
 
 export const updateProfilePicture = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { avatar } = req.files;
+    const { avatar } = req.files;
 
-      // console.log(avatar);
+    // console.log(avatar);
 
-      if (!avatar)
-        return next(new ErrorHandler("Please provide an image", 422));
+    if (!avatar) return next(new ErrorHandler("Please provide an image", 422));
 
-      const userId = req?.user._id as any;
+    const userId = req?.user._id as any;
 
-      if (!userId)
-        return next(new ErrorHandler("Please log in to upload picture.", 403));
+    if (!userId)
+      return next(new ErrorHandler("Please log in to upload picture.", 403));
 
-      const user = await User.findById(userId);
+    const user = await User.findById(userId);
 
-      if (!user) return next(new ErrorHandler("User not found", 404));
+    if (!user) return next(new ErrorHandler("User not found", 404));
 
-      if (Array.isArray(avatar))
-        return next(new ErrorHandler("Multiple images not allowed", 422));
+    if (Array.isArray(avatar))
+      return next(new ErrorHandler("Multiple images not allowed", 422));
 
-      if (!avatar.mimetype?.startsWith("image"))
-        return next(
-          new ErrorHandler(
-            "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
-            404
-          )
-        );
-
-      // delete the old avatar from the cloudinary db
-      if (user.avatar.id) {
-        const folderPath = `byWay/users/${user.name + " - " + user._id}`;
-        await cloudApi.delete_resources_by_prefix(folderPath);
-      }
-
-      // upload the new avatar to the cloudinary db
-
-      // create a folder and subfolder for each user
-      const folderPath = `byWay/users/${user.name + " - " + user._id}`;
-
-      // upload the new avatar to the cloudinary db
-      await cloudUploader.upload(
-        avatar.filepath,
-        {
-          folder: folderPath,
-          transformation: {
-            width: 500,
-            height: 500,
-            crop: "thumb",
-            gravity: "face",
-          },
-        },
-        async (error: any, result) => {
-          if (error) return next(new ErrorHandler(error.message, 400));
-
-          const publicId = result?.public_id;
-
-          const imageId = publicId?.split("/").pop();
-
-          const imageUrl = result?.secure_url;
-
-          user.avatar.url = imageUrl || "";
-          user.avatar.id = imageId || "";
-
-          // await redis.set(`user - ${userId}`, JSON.stringify(user));
-
-          await user.save();
-        }
+    if (!avatar.mimetype?.startsWith("image"))
+      return next(
+        new ErrorHandler(
+          "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
+          404
+        )
       );
-      res.status(201).json({ success: true, user });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
+
+    // delete the old avatar from the cloudinary db
+    if (user.avatar.id) {
+      const folderPath = `byWay/users/${user.name + " - " + user._id}`;
+      await cloudApi.delete_resources_by_prefix(folderPath);
     }
+
+    // upload the new avatar to the cloudinary db
+
+    // create a folder and subfolder for each user
+    const folderPath = `byWay/users/${user.name + " - " + user._id}`;
+
+    // upload the new avatar to the cloudinary db
+    await cloudUploader.upload(
+      avatar.filepath,
+      {
+        folder: folderPath,
+        transformation: {
+          width: 500,
+          height: 500,
+          crop: "thumb",
+          gravity: "face",
+        },
+      },
+      async (error: any, result) => {
+        if (error) return next(new ErrorHandler(error.message, 400));
+
+        const publicId = result?.public_id;
+
+        const imageId = publicId?.split("/").pop();
+
+        const imageUrl = result?.secure_url;
+
+        user.avatar.url = imageUrl || "";
+        user.avatar.id = imageId || "";
+
+        // await redis.set(`user - ${userId}`, JSON.stringify(user));
+
+        await user.save();
+      }
+    );
+
+    res.apiSuccess(null, "Avatar updated", 201);
   }
 );
 
@@ -466,15 +434,28 @@ export const getAllUsers = catchAsyncError(
 );
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-// get all admin - admin only
+// get admins list
 
 export const getAllAdmins = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      getAllAdminsService(res);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    getAllAdminsService(res, next);
+  }
+);
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+// get admin
+
+export const getAdmin = catchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const admins = await User.find({ role: "admin" })
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    if (!admins) return next(new ErrorHandler("Admins not found", 404));
+
+    const admin = admins[0];
+
+    res.apiSuccess(admin, "Admin fetched");
   }
 );
 

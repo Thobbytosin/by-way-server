@@ -18,7 +18,11 @@ orderRouter.get(
   getAllOrders
 );
 
-orderRouter.get("/payment/stripepublishablekey", sendStripePublishableKey);
+orderRouter.get(
+  "/payment/stripe-publishable-key",
+  isUserAuthenticated,
+  sendStripePublishableKey
+);
 
 orderRouter.post("/payment", isUserAuthenticated, newPayment);
 

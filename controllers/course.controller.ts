@@ -271,7 +271,7 @@ export const getSingleCourse = catchAsyncError(
 
         // await redis.set(`course - ${courseId}`, JSON.stringify(course));
 
-        res.status(200).json({ success: true, course });
+        res.apiSuccess(course, "Course fetched");
       }
     } catch (error: any) {
       return next(new ErrorHandler(error.messsage, 400));

@@ -132,14 +132,6 @@ export const createOrder = catchAsyncError(
         }
       );
 
-      // const newUser = await User.findById(user._id);
-
-      //   update user to redis
-      // await redis.set(
-      //   `user - ${newUser?._id as string}`,
-      //   JSON.stringify(newUser) as any
-      // );
-
       //   create notification
       await Notification.create({
         userId: user._id,
@@ -187,34 +179,28 @@ export const getAllOrders = catchAsyncError(
 // send stripe publishable key
 export const sendStripePublishableKey = catchAsyncError(
   (req: Request, res: Response) => {
-    res
-      .status(200)
-      .json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+    res.apiSuccess(
+      { publishableKey: process.env.STRIPE_PUBLISHABLE_KEY },
+      "Key sent"
+    );
   }
 );
 
 // create new payment
 export const newPayment = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { amount } = req.body;
-      const myPayment = await stripe.paymentIntents.create({
-        amount: amount,
-        currency: "NGN",
-        metadata: {
-          company: "ByWay E-Learning Management System",
-        },
-        automatic_payment_methods: {
-          enabled: true,
-        },
-      });
+    const { amount } = req.body;
+    const myPayment = await stripe.paymentIntents.create({
+      amount: amount,
+      currency: "NGN",
+      metadata: {
+        company: "ByWay E-Learning Management System",
+      },
+      automatic_payment_methods: {
+        enabled: true,
+      },
+    });
 
-      res.status(201).json({
-        success: true,
-        client_secret: myPayment.client_secret,
-      });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.message, 500));
-    }
+    res.apiSuccess({ re_cur: myPayment.client_secret }, "Payment Successful");
   }
 );
