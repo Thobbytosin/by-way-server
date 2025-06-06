@@ -16,13 +16,11 @@
   "author": "Tobi Falode",
   "license": "ISC",
   "dependencies": {
-    "@faker-js/faker": "^8.4.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",
     "@types/ejs": "^3.1.5",
     "@types/express": "^4.17.21",
-    "@types/faker": "^6.6.9",
     "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^22.3.0",
