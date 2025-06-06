@@ -1,5 +1,5 @@
 import mongoose, { Document, Schema, Model } from "mongoose";
-import bcrypt from "bcryptjs";
+import bcryptjs from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
@@ -93,7 +93,7 @@ userSchema.pre<IUser>("save", async function (next) {
   if (!this.isModified("password")) {
     next();
   }
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await bcryptjs.hash(this.password, 10);
   next();
 });
 
@@ -114,7 +114,7 @@ userSchema.methods.SignRefreshToken = function () {
 userSchema.methods.comparePassword = async function (
   enteredPassword: string
 ): Promise<boolean> {
-  return await bcrypt.compare(enteredPassword, this.password);
+  return await bcryptjs.compare(enteredPassword, this.password);
 };
 
 const User: Model<IUser> = mongoose.model("User", userSchema);
