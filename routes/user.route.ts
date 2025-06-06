@@ -90,7 +90,6 @@ userRouter.delete(
 // update userVideoViewed
 userRouter.put(
   "/update-user-videos-viewed",
-
   isUserAuthenticated,
   markVideoAsViewed
 );

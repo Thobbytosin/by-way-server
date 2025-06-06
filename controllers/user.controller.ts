@@ -12,7 +12,10 @@ import {
   refreshTokenOptions,
   sendToken,
 } from "../utils/jwt";
+import bcryptjs from "bcryptjs";
+import bcrypt from "bcrypt";
 // import { redis } from "../utils/redis";
+
 import {
   getALLUsersService,
   getAllAdminsService,
@@ -24,6 +27,13 @@ import Course from "../models/course.model";
 import { isValidObjectId } from "mongoose";
 
 dotenv.config();
+
+// const password = "Tobiloba112";
+// const hash = "$2a$10$JTcEsUl5V.ktvvhF/v3GFuQpei3jnHaIz/VnCzTtkxtrb9JLzBD9u";
+// console.log(bcryptjs.hashSync(password));
+
+// const m = bcryptjs.compareSync(password, hash);
+// console.log("matxh:", m);
 
 ////////////////////////////////////////////////////////////////////////
 // Register user
@@ -55,10 +65,8 @@ export const registerUser = catchAsyncError(
 
     const data = { user: { name: user.name }, activationCode };
 
-    const html = await ejs.renderFile(
-      path.join(__dirname, "../mails/activation-mail.ejs"),
-      data
-    );
+    // save activation token in the response cookie
+    res.cookie("activation_Token", activationToken.token, accessTokenOptions);
 
     try {
       await sendMail({
@@ -70,11 +78,10 @@ export const registerUser = catchAsyncError(
 
       res.apiSuccess(
         null,
-        `Please check your email: ${user.email} to activate your account`
+        `An activation token has been sent to your email: ${user.email}.`
       );
     } catch (error: any) {
-      // console.log(error);
-      return next(new ErrorHandler(error.message, 400));
+      return next(new ErrorHandler("Something went wrong", 400));
     }
   }
 );
@@ -103,42 +110,41 @@ export const createActivationToken = (user: any): IActivationToken => {
 // activate user
 interface IActivationRequest {
   activationCode: string;
-  activationToken: string;
 }
 
 export const activateUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { activationCode, activationToken } =
-        req.body as IActivationRequest;
+    const { activationCode } = req.body as IActivationRequest;
 
-      const newUser: { user: IUser; activationCode: string } = jwt.verify(
-        activationToken,
-        process.env.ACTIVATION_SECRET as string
-      ) as { user: IUser; activationCode: string };
+    const activationToken = req.cookies.activation_Token;
 
-      if (newUser.activationCode !== activationCode)
-        return next(new ErrorHandler("Invalid activation code", 422));
-
-      const { name, email, password } = newUser.user;
-
-      const userExists = await User.findOne({ email });
-
-      if (userExists)
-        return next(new ErrorHandler("Account already exists", 422));
-
-      // const hashPassword = bcrypt.hashSync(password, 10);
-
-      const user = await User.create({
-        name,
-        email,
-        password,
-        emailVerified: true,
-      });
-      res.status(201).json({ success: true, message: "Account created" });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
+    if (!activationToken) {
+      return next(new ErrorHandler("Activation code has expired", 401));
     }
+
+    const newUser: { user: IUser; activationCode: string } = jwt.verify(
+      activationToken,
+      process.env.ACTIVATION_SECRET as string
+    ) as { user: IUser; activationCode: string };
+
+    if (newUser.activationCode !== activationCode)
+      return next(new ErrorHandler("Invalid activation code", 422));
+
+    const { name, email, password } = newUser.user;
+
+    const userExists = await User.findOne({ email });
+
+    if (userExists)
+      return next(new ErrorHandler("Account already exists", 422));
+
+    await User.create({
+      name,
+      email,
+      password,
+      emailVerified: true,
+    });
+
+    res.apiSuccess(null, "Account registered", 201);
   }
 );
 
@@ -164,6 +170,7 @@ export const loginUser = catchAsyncError(
     if (!user)
       return next(new ErrorHandler("Invalid username or password", 404));
 
+    // check if password matches
     const isPasswordMatch = await user.comparePassword(password);
 
     if (!isPasswordMatch)
@@ -529,38 +536,34 @@ export const getAllUsersLatestInfo = catchAsyncError(
 
 export const markVideoAsViewed = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userId = req.user?._id as any;
+    const userId = req.user?._id as any;
 
-      if (!isValidObjectId(userId))
-        return next(new ErrorHandler("Invalid user id", 422));
+    if (!isValidObjectId(userId))
+      return next(new ErrorHandler("Invalid user id", 422));
 
-      const { courseId, videoId } = req.body;
+    const { courseId, videoId } = req.body;
 
-      const user = await User.updateOne(
-        {
-          _id: userId,
-          "courses.courseId": courseId,
-          "courses.progress.videoId": videoId,
-        },
-        { $set: { "courses.$.progress.$[video].viewed": true } },
-        { arrayFilters: [{ "video.videoId": videoId }] }
-      );
+    const user = await User.updateOne(
+      {
+        _id: userId,
+        "courses.courseId": courseId,
+        "courses.progress.videoId": videoId,
+      },
+      { $set: { "courses.$.progress.$[video].viewed": true } },
+      { arrayFilters: [{ "video.videoId": videoId }] }
+    );
 
-      if (!user) return next(new ErrorHandler("User not found", 404));
+    if (!user) return next(new ErrorHandler("User not found", 404));
 
-      const newUser = await User.findById(userId);
+    const newUser = await User.findById(userId);
 
-      //   update user to redis
-      // await redis.set(
-      //   `user - ${newUser?._id as string}`,
-      //   JSON.stringify(newUser) as any
-      // );
+    //   update user to redis
+    // await redis.set(
+    //   `user - ${newUser?._id as string}`,
+    //   JSON.stringify(newUser) as any
+    // );
 
-      res.status(200).json({ success: true, user });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(null, "You have completed this lesson. Well done!");
   }
 );
 

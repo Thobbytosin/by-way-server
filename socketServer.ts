@@ -2,20 +2,23 @@ import { Server as SocketIOServer } from "socket.io";
 import http from "http";
 
 export const initSocketServer = (server: http.Server) => {
-  const io = new SocketIOServer(server);
+  const io = new SocketIOServer(server, {
+    cors: {
+      origin: process.env.FRONTEND_ORIGIN || "http://localhost:3000", // or your frontend URL
+      methods: ["GET", "POST", "PUT", "DELETE"],
+      credentials: true,
+    },
+  });
 
   io.on("connection", (socket) => {
-    // console.log("A connection has been established");
+    console.log("Socket connected:", socket.id);
 
-    // listen for incoming connections from the frontend
     socket.on("notification", (data) => {
-      // send the notifications to all connected clients (admin dashboard)
       io.emit("newNotification", data);
     });
 
-    // when the connection is disconnected
     socket.on("disconnect", () => {
-      // console.log("connection disconnected");
+      console.log("Socket disconnected:", socket.id);
     });
   });
 };

@@ -61,12 +61,12 @@ courseRouter.put("/add-question", isUserAuthenticated, addQuestion);
 // add answer to course question (only paid users)
 courseRouter.put("/add-answer", isUserAuthenticated, addAnswer);
 
-// add a review (only paid us2ers)
+// add a review (only paid users)
 courseRouter.put("/add-review/:course_id", isUserAuthenticated, addReview);
 
 // reply to a review (only admin)
 courseRouter.put(
-  "/add-reply-review",
+  "/add-reply-review/:course_id",
   isUserAuthenticated,
   authorizeRoles("admin"),
   addReplyToReview

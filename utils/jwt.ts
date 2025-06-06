@@ -40,6 +40,13 @@ export const hasLoggedInTokenOptions: ITokenOptions = {
   secure: isProduction,
 };
 
+export const activationTokenOptions: ITokenOptions = {
+  maxAge: 4 * 60 * 1000, // 4 miuntes
+  httpOnly: true,
+  sameSite: isProduction ? "none" : "lax",
+  secure: isProduction,
+};
+
 export const sendToken = async (
   user: IUser,
   statusCode: number,
