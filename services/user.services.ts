@@ -27,12 +27,17 @@ export const getALLUsersService = async (res: Response) => {
 };
 
 // get all admins
-export const getAllAdminsService = async (res: Response) => {
+export const getAllAdminsService = async (
+  res: Response,
+  next: NextFunction
+) => {
   const admins = await User.find({ role: "admin" })
     .select("-password")
     .sort({ createdAt: -1 });
 
-  res.status(200).json({ success: true, admins });
+  if (!admins) return next(new ErrorHandler("Admins not found", 404));
+
+  res.apiSuccess(admins, "Admin list fetched");
 };
 
 // update user role - admin only

@@ -2,6 +2,7 @@ import express from "express";
 import {
   activateUser,
   deleteUser,
+  getAdmin,
   getAllAdmins,
   getAllUsers,
   getAllUsersLatestInfo,
@@ -33,7 +34,7 @@ userRouter.post("/activate-user", activateUser);
 userRouter.post("/login", loginUser);
 
 // logout user
-userRouter.get("/logout", isUserAuthenticated, logoutUser);
+userRouter.post("/logout", isUserAuthenticated, logoutUser);
 
 // refresh  tokens  (to keep user logged in)
 userRouter.get("/refresh-tokens", updateTokens, refreshTokens);
@@ -48,17 +49,11 @@ userRouter.post("/social-auth", socialAuth);
 userRouter.put("/update-user-info", isUserAuthenticated, updateUserInfo);
 
 // update user password
-userRouter.put(
-  "/update-user-password",
-
-  isUserAuthenticated,
-  updatePassword
-);
+userRouter.put("/update-user-password", isUserAuthenticated, updatePassword);
 
 // update user profile image
 userRouter.put(
   "/update-profile-picture",
-
   isUserAuthenticated,
   fileParser,
   updateProfilePicture
@@ -73,17 +68,11 @@ userRouter.get(
 );
 
 // get all admins
-userRouter.get(
-  "/get-all-admins",
-
-  isUserAuthenticated,
-  getAllAdmins
-);
+userRouter.get("/get-admin-list", isUserAuthenticated, getAllAdmins);
 
 // update user role (admin only)
 userRouter.put(
   "/update-user-role",
-
   isUserAuthenticated,
   authorizeRoles("admin"),
   updateUserRole
@@ -101,11 +90,12 @@ userRouter.delete(
 // update userVideoViewed
 userRouter.put(
   "/update-user-videos-viewed",
-
   isUserAuthenticated,
   markVideoAsViewed
 );
 
 userRouter.get("/get-users-list", getAllUsersLatestInfo);
+
+userRouter.get("/get-admin", getAdmin);
 
 export default userRouter;

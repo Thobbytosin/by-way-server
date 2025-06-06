@@ -35,8 +35,15 @@ courseRouter.put(
   editCourse
 );
 
-// get a course
-courseRouter.get("/get-course/:course_id", getSingleCourse);
+// get a course (logged in user)
+courseRouter.get(
+  "/get-course/:course_id",
+  isUserAuthenticated,
+  getSingleCourse
+);
+
+// get a course free
+courseRouter.get("/get-course-free/:course_id", getSingleCourse);
 
 // get all courses
 courseRouter.get("/get-courses", getAllCourses);
@@ -54,12 +61,12 @@ courseRouter.put("/add-question", isUserAuthenticated, addQuestion);
 // add answer to course question (only paid users)
 courseRouter.put("/add-answer", isUserAuthenticated, addAnswer);
 
-// add a review (only paid us2ers)
+// add a review (only paid users)
 courseRouter.put("/add-review/:course_id", isUserAuthenticated, addReview);
 
 // reply to a review (only admin)
 courseRouter.put(
-  "/add-reply-review",
+  "/add-reply-review/:course_id",
   isUserAuthenticated,
   authorizeRoles("admin"),
   addReplyToReview

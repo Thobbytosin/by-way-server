@@ -58,8 +58,8 @@ interface ICourse extends Document {
   level: string;
   demoVideo: object;
   category: string;
-  benefits: { title: string[] };
-  prerequisites: { title: string[] };
+  benefits: { title: string }[];
+  prerequisites: { title: string }[];
   reviews: IReview[];
   courseData: ICourseData[];
   ratings: number;
