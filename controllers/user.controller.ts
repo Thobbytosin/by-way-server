@@ -2,19 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import User, { IUser } from "../models/user.model";
 import ErrorHandler from "../utils/errorHandler";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
-import jwt, { JwtPayload, Secret } from "jsonwebtoken";
+import jwt, { Secret } from "jsonwebtoken";
 import dotenv from "dotenv";
-import ejs from "ejs";
-import path from "path";
 import sendMail from "../utils/sendMail";
-import {
-  accessTokenOptions,
-  refreshTokenOptions,
-  sendToken,
-} from "../utils/jwt";
-import bcryptjs from "bcryptjs";
-import bcrypt from "bcrypt";
-// import { redis } from "../utils/redis";
+import { accessTokenOptions, sendToken } from "../utils/jwt";
 
 import {
   getALLUsersService,
@@ -23,17 +14,9 @@ import {
   updateUserRoleService,
 } from "../services/user.services";
 import cloudUploader, { cloudApi } from "../utils/cloudinary";
-import Course from "../models/course.model";
 import { isValidObjectId } from "mongoose";
 
 dotenv.config();
-
-// const password = "Tobiloba112";
-// const hash = "$2a$10$JTcEsUl5V.ktvvhF/v3GFuQpei3jnHaIz/VnCzTtkxtrb9JLzBD9u";
-// console.log(bcryptjs.hashSync(password));
-
-// const m = bcryptjs.compareSync(password, hash);
-// console.log("matxh:", m);
 
 ////////////////////////////////////////////////////////////////////////
 // Register user
