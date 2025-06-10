@@ -174,9 +174,9 @@ export const loginUser = catchAsyncError(
 
 export const logoutUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    res.clearCookie("access_Token");
-    res.clearCookie("refresh_Token");
-    res.clearCookie("_can_logged_t");
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    res.clearCookie("_can_logged_in");
 
     res.apiSuccess(null, "Logout successful");
   }
@@ -529,6 +529,7 @@ export const markVideoAsViewed = catchAsyncError(
 export const refreshTokens = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
+    const { accessToken, loggedInToken, refreshToken } = req.tokens;
 
     // accessToken expires in
     const accessTokenExpiresAt = new Date(
@@ -539,6 +540,9 @@ export const refreshTokens = catchAsyncError(
       success: true,
       message: "Tokens Refreshed",
       expiresAt: accessTokenExpiresAt,
+      accessToken,
+      refreshToken,
+      loggedInToken,
     });
   }
 );

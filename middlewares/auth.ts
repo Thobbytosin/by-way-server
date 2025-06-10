@@ -11,17 +11,17 @@ export const isUserAuthenticated = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     // check if user is logged in (check and verify access token)
 
-    const { access_Token } = req.cookies;
+    const { access_token } = req.cookies;
 
     // if there is no access token
-    if (!access_Token)
+    if (!access_token)
       return next(
         new ErrorHandler("Unauthorized: Authentication required.", 401)
       );
 
     // verify access token
     const decodeAccess: any = jwt.verify(
-      access_Token,
+      access_token,
       (process.env.ACCESS_TOKEN_SIGN_IN as string) || ""
     );
 
