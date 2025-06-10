@@ -64,12 +64,12 @@ export const sendToken = async (
   ).getTime();
 
   // save the tokens in the cookie
-  res.cookie("access_Token", accessToken, accessTokenOptions);
-  res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
-  res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
+  // res.cookie("access_Token", accessToken, accessTokenOptions);
+  // res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
+  // res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
 
-  res.setHeader("x-access-token", accessToken);
-  res.setHeader("x-refresh-token", refreshToken);
+  // res.setHeader("x-access-token", accessToken);
+  // res.setHeader("x-refresh-token", refreshToken);
 
   res.apiSuccess(
     {

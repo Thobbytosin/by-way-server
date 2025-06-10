@@ -100,7 +100,7 @@ userSchema.pre<IUser>("save", async function (next) {
 // sign access token
 userSchema.methods.SignAccessToken = function () {
   return jwt.sign({ id: this._id }, process.env.ACCESS_TOKEN_SIGN_IN || "", {
-    expiresIn: "1m",
+    expiresIn: "59m",
   });
 };
 // sign Refresh token
