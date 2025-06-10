@@ -529,6 +529,7 @@ export const markVideoAsViewed = catchAsyncError(
 export const refreshTokens = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const user = req.user;
+    const { accessToken, loggedInToken, refreshToken } = req.tokens;
 
     // accessToken expires in
     const accessTokenExpiresAt = new Date(
@@ -539,6 +540,9 @@ export const refreshTokens = catchAsyncError(
       success: true,
       message: "Tokens Refreshed",
       expiresAt: accessTokenExpiresAt,
+      accessToken,
+      refreshToken,
+      loggedInToken,
     });
   }
 );

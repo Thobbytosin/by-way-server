@@ -7,6 +7,11 @@ declare global {
   namespace Express {
     interface Request {
       user: IUser;
+      tokens: {
+        accessToken: string;
+        refreshToken: string;
+        loggedInToken: string;
+      };
       files: { [key: string]: File | File[] };
     }
 
