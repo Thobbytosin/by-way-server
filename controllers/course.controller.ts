@@ -2,16 +2,13 @@ import { NextFunction, Request, Response } from "express";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
 import ErrorHandler from "../utils/errorHandler";
 import cloudUploader, { cloudApi } from "../utils/cloudinary";
-import User, { IUser } from "../models/user.model";
+import User from "../models/user.model";
 import {
   createCourse,
   getAllCoursesService,
 } from "../services/course.services";
 import Course from "../models/course.model";
-// import { redis } from "../utils/redis";
 import { isValidObjectId } from "mongoose";
-import path from "path";
-import ejs from "ejs";
 import sendMail from "../utils/sendMail";
 import Notification from "../models/notification.model";
 import axios from "axios";
@@ -21,37 +18,190 @@ import axios from "axios";
 
 export const uploadCourse = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const data = req.body;
-      const { demoVideo, thumbnail } = req.files;
-      //for the arrays
-      const parsedBenefits = JSON.parse(data.benefits);
-      const parsedPrerequisites = JSON.parse(data.prerequisites);
-      const parsedCourseData = JSON.parse(data.courseData);
+    const data = req.body;
+    const { demoVideo, thumbnail } = req.files;
 
-      data.prerequisites = parsedPrerequisites;
-      data.benefits = parsedBenefits;
-      data.courseData = parsedCourseData;
+    // ensure price is a number
+    data.price = +data.price;
+    data.estimatedPrice = +data.estimatedPrice;
 
-      if (!demoVideo)
-        return next(new ErrorHandler("Upload Course Intro Video", 403));
+    //for the arrays
+    const parsedBenefits = JSON.parse(data.benefits);
+    const parsedPrerequisites = JSON.parse(data.prerequisites);
+    const parsedCourseData = JSON.parse(data.courseData);
 
-      if (!data) return next(new ErrorHandler("Fields are missing", 422));
+    data.prerequisites = parsedPrerequisites;
+    data.benefits = parsedBenefits;
+    data.courseData = parsedCourseData;
 
-      const userId = req.user?._id;
+    console.log("CREATE DATA:", data);
 
-      const user = await User.findById(userId);
+    if (!demoVideo)
+      return next(new ErrorHandler("Upload Course Intro Video", 403));
 
-      if (!user) return next(new ErrorHandler("Error finding user", 404));
+    if (!data) return next(new ErrorHandler("Fields are missing", 422));
 
-      // check if course exist
-      const isCourseExist = await Course.findOne({ name: data.name });
+    const userId = req.user?._id;
 
-      if (isCourseExist)
-        return next(new ErrorHandler("Course already exists", 422));
+    const user = await User.findById(userId);
 
-      // for image upload
+    if (!user) return next(new ErrorHandler("Error finding user", 404));
 
+    // check if course exist
+    const isCourseExist = await Course.findOne({ name: data.name });
+
+    if (isCourseExist)
+      return next(new ErrorHandler("Course already exists", 422));
+
+    // for image upload
+
+    if (!thumbnail) return next(new ErrorHandler("Upload Course Image", 403));
+
+    if (Array.isArray(thumbnail))
+      return next(new ErrorHandler("Multiple images not allowed", 422));
+
+    if (!thumbnail.mimetype?.startsWith("image"))
+      return next(
+        new ErrorHandler(
+          "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
+          404
+        )
+      );
+
+    if (thumbnail) {
+      const folderPath = `byWay/courses/${data.name}/thumbnail`;
+
+      // delete old thumbnail
+      await cloudApi.delete_resources_by_prefix(folderPath);
+      //
+      await cloudUploader.upload(
+        thumbnail.filepath,
+        {
+          folder: folderPath,
+          transformation: {
+            gravity: "face",
+          },
+        },
+        async (error: any, result) => {
+          if (error) return next(new ErrorHandler(error.message, 400));
+
+          const publicId = result?.public_id;
+
+          const thumbnailId = publicId?.split("/").pop();
+
+          const thumbnailUrl = result?.secure_url;
+
+          data.thumbnail = {
+            id: thumbnailId,
+            url: thumbnailUrl,
+          };
+        }
+      );
+    }
+
+    // for video upload
+    if (Array.isArray(demoVideo))
+      return next(new ErrorHandler("Multiple videos not allowed", 422));
+
+    // 2. Check if the file is a video (not an image)
+    if (!demoVideo.mimetype?.startsWith("video/")) {
+      return next(
+        new ErrorHandler(
+          "Invalid format. File must be a video (e.g., .mp4, .mov)",
+          400
+        )
+      );
+    }
+
+    // 3. Validate file size (e.g., 100MB limit)
+    const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 100MB
+    if (demoVideo.size > MAX_SIZE_BYTES) {
+      return next(
+        new ErrorHandler(
+          `Video exceeds ${MAX_SIZE_BYTES / (1024 * 1024)}MB limit`,
+          413 // Payload Too Large
+        )
+      );
+    }
+
+    // upload the demoVideo to the cloudinary db
+
+    if (demoVideo) {
+      // create a folder path
+      const folderPath = `byWay/courses/${data.name}/demoVideo`;
+
+      // delete old video
+      await cloudApi.delete_resources_by_prefix(folderPath);
+
+      await cloudUploader.upload(
+        demoVideo.filepath,
+        {
+          folder: folderPath,
+          resource_type: "video",
+          chunk_size: 6000000,
+          max_file_size: 10000000, // 30mb
+          eager: [
+            { width: 640, height: 360, crop: "scale" }, // Generate a lower-res version
+          ],
+        },
+        async (error: any, result) => {
+          if (error) return next(new ErrorHandler(error.message, 400));
+
+          const publicId = result?.public_id;
+
+          const demoVideoId = publicId?.split("/").pop();
+
+          const demoVideoUrl = result?.secure_url;
+
+          data.demoVideo = {
+            id: demoVideoId,
+            url: demoVideoUrl,
+          };
+        }
+      );
+    }
+
+    createCourse(data, res, next);
+  }
+);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// edit course
+
+export const editCourse = catchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const courseId = req.params.course_id;
+    const data = req.body;
+    const { demoVideo, thumbnail } = req.files;
+
+    // ensure price is a number
+    data.price = +data.price;
+    data.estimatedPrice = +data.estimatedPrice;
+    data.price = +data.price;
+    data.purchase = +data.purchase;
+
+    //for the arrays
+    const parsedBenefits = JSON.parse(data.benefits);
+    const parsedPrerequisites = JSON.parse(data.prerequisites);
+    const parsedCourseData = JSON.parse(data.courseData);
+
+    data.prerequisites = parsedPrerequisites;
+    data.benefits = parsedBenefits;
+    data.courseData = parsedCourseData;
+
+    // check if course exist
+    const isCourseExist = await Course.findById(courseId);
+
+    if (!isCourseExist) return next(new ErrorHandler("Course not found", 404));
+
+    if (!demoVideo && !data.demoVideo)
+      return next(new ErrorHandler("Upload Course Intro Video", 403));
+
+    if (!data) return next(new ErrorHandler("Fields are missing", 422));
+
+    // for image upload
+
+    if (!data.thumbnail) {
       if (!thumbnail) return next(new ErrorHandler("Upload Course Image", 403));
 
       if (Array.isArray(thumbnail))
@@ -95,7 +245,9 @@ export const uploadCourse = catchAsyncError(
           }
         );
       }
+    }
 
+    if (!data.demoVideo) {
       // for video upload
       if (Array.isArray(demoVideo))
         return next(new ErrorHandler("Multiple videos not allowed", 422));
@@ -111,7 +263,7 @@ export const uploadCourse = catchAsyncError(
       }
 
       // 3. Validate file size (e.g., 100MB limit)
-      const MAX_SIZE_BYTES = 30 * 1024 * 1024; // 100MB
+      const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 100MB
       if (demoVideo.size > MAX_SIZE_BYTES) {
         return next(
           new ErrorHandler(
@@ -122,7 +274,6 @@ export const uploadCourse = catchAsyncError(
       }
 
       // upload the demoVideo to the cloudinary db
-
       if (demoVideo) {
         // create a folder path
         const folderPath = `byWay/courses/${data.name}/demoVideo`;
@@ -136,7 +287,7 @@ export const uploadCourse = catchAsyncError(
             folder: folderPath,
             resource_type: "video",
             chunk_size: 6000000,
-            max_file_size: 30000000, // 30mb
+            max_file_size: 10000000, // 30mb
             eager: [
               { width: 640, height: 360, crop: "scale" }, // Generate a lower-res version
             ],
@@ -157,92 +308,18 @@ export const uploadCourse = catchAsyncError(
           }
         );
       }
-
-      createCourse(data, res, next);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
     }
-  }
-);
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// edit course
+    // update course
+    await Course.updateOne(
+      { _id: courseId },
+      {
+        $set: data,
+      },
+      { new: true }
+    );
 
-export const editCourse = catchAsyncError(
-  async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const data = req.body;
-      // console.log(data);
-
-      if (!data) return next(new ErrorHandler("Fields cannot be empty", 422));
-
-      const thumbnail = data.thumbnail;
-
-      if (thumbnail) {
-        if (!thumbnail.id || !thumbnail.url) {
-          const folderPath = `byWay/users/${data.name}`;
-          // delete old thumbnail
-          await cloudApi.delete_resources_by_prefix(folderPath);
-          // upload new thumbnail
-          await cloudUploader.upload(
-            thumbnail,
-            {
-              folder: folderPath,
-              transformation: {
-                gravity: "face",
-              },
-            },
-            async (error: any, result) => {
-              if (error) return next(new ErrorHandler(error.message, 400));
-
-              const publicId = result?.public_id;
-
-              const thumbnailId = publicId?.split("/").pop();
-
-              const thumbnailUrl = result?.secure_url;
-
-              data.thumbnail = {
-                id: thumbnailId,
-                url: thumbnailUrl,
-              };
-            }
-          );
-        }
-      }
-
-      const courseId = req.params.course_id;
-
-      const course = await Course.findByIdAndUpdate(
-        courseId,
-        {
-          $set: data,
-        },
-        { new: true }
-      );
-
-      if (!course) return next(new ErrorHandler("Course not found", 404));
-
-      // update redis
-      // await redis.set(`course - ${courseId}`, JSON.stringify(course));
-
-      // for redis update
-      const courses = await Course.find().select(
-        "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-      );
-
-      if (!courses) return next(new ErrorHandler("Course not found", 404));
-
-      // update all courses in redis too
-      // await redis.set("allCourses", JSON.stringify(courses));
-
-      res.status(201).json({
-        success: true,
-        message: "Course updated successfully",
-        course,
-      });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(null, "Course updated", 201);
   }
 );
 
@@ -675,11 +752,7 @@ export const addReplyToReview = catchAsyncError(
 
 export const getAdminAllCourses = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      getAllCoursesService(res);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    getAllCoursesService(res);
   }
 );
 
@@ -688,33 +761,27 @@ export const getAdminAllCourses = catchAsyncError(
 
 export const deleteCourse = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { courseId } = req.params;
+    const { courseId } = req.params;
 
-      const course = await Course.findById(courseId);
+    const course = await Course.findById(courseId);
 
-      if (!course) return next(new ErrorHandler("Course not found", 404));
+    if (!course) return next(new ErrorHandler("Course not found", 404));
 
-      await course.deleteOne();
+    await course.deleteOne();
 
-      // await redis.del(`course - ${courseId}`);
+    // await redis.del(`course - ${courseId}`);
 
-      // for redis update
-      const courses = await Course.find().select(
-        "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-      );
+    // for redis update
+    const courses = await Course.find().select(
+      "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+    );
 
-      if (!courses) return next(new ErrorHandler("Course not found", 404));
+    if (!courses) return next(new ErrorHandler("Course not found", 404));
 
-      // update all courses in redis too
-      // await redis.set("allCourses", JSON.stringify(courses));
+    // update all courses in redis too
+    // await redis.set("allCourses", JSON.stringify(courses));
 
-      res
-        .status(200)
-        .json({ success: true, message: "Course deleted successfully" });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(null, "Course deleted");
   }
 );
 

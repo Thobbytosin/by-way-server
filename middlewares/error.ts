@@ -9,7 +9,6 @@ const ErrorMiddleware = (
 ) => {
   err.statusCode = err?.statusCode || 500;
   err.message = err?.message || "Internal Server Error";
-  err.name = err?.name || "Server Error";
 
   // wrong mongodb id error
   if (err.message === "CastError") {

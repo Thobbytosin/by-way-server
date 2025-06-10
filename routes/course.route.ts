@@ -32,6 +32,7 @@ courseRouter.put(
   "/edit-course/:course_id",
   isUserAuthenticated,
   authorizeRoles("admin"),
+  fileParser,
   editCourse
 );
 

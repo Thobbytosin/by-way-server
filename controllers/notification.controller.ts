@@ -8,13 +8,9 @@ import cron from "node-cron";
 // get all notifications - only admin
 export const getAllNotifications = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const notifications = await Notification.find().sort({ createdAt: -1 });
+    const notifications = await Notification.find().sort({ createdAt: -1 });
 
-      res.status(201).json({ success: true, notifications });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(notifications, "Notifications list fetched");
   }
 );
 
@@ -23,29 +19,21 @@ export const getAllNotifications = catchAsyncError(
 
 export const updateNotificationStatus = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const notificationId = req.params.id;
+    const notificationId = req.params.id;
 
-      console.log(notificationId);
+    const notification = await Notification.findById(notificationId);
 
-      const notification = await Notification.findById(notificationId);
-
-      if (!notification) {
-        return next(new ErrorHandler("Notification not found", 404));
-      } else {
-        notification.status
-          ? (notification.status = "read")
-          : notification.status;
-      }
-
-      await notification.save();
-
-      const notifications = await Notification.find().sort({ createdAt: -1 });
-
-      res.status(200).json({ success: true, notifications });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
+    if (!notification) {
+      return next(new ErrorHandler("Notification not found", 404));
+    } else {
+      notification.status
+        ? (notification.status = "read")
+        : notification.status;
     }
+
+    await notification.save();
+
+    res.apiSuccess(null, "Notification updated");
   }
 );
 

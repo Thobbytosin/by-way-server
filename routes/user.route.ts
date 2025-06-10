@@ -81,7 +81,6 @@ userRouter.put(
 // delete user account (admin only)
 userRouter.delete(
   "/delete-user/:userId",
-
   isUserAuthenticated,
   authorizeRoles("admin"),
   deleteUser
