@@ -56,9 +56,9 @@ export const updateTokens = catchAsyncError(
 
     //   save tokens in the response cookie
 
-    // res.cookie("access_Token", accessToken, accessTokenOptions);
-    // res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
-    // res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
+    res.cookie("access_token", accessToken, accessTokenOptions);
+    res.cookie("refresh_token", refreshToken, refreshTokenOptions);
+    res.cookie("_can_logged_in", loggedInToken, hasLoggedInTokenOptions);
 
     // res.setHeader("x-access-token", accessToken);
     // res.setHeader("x-refresh-token", refreshToken);
