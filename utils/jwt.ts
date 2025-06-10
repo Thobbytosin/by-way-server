@@ -75,6 +75,9 @@ export const sendToken = async (
     {
       user,
       expiresAt: accessTokenExpiresAt,
+      accessToken,
+      refreshToken,
+      loggedInToken,
     },
     "Logged in successfully",
     statusCode
