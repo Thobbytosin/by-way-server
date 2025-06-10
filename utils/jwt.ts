@@ -10,6 +10,7 @@ interface ITokenOptions {
   httpOnly: boolean;
   sameSite: "none" | "lax" | "strict";
   secure?: boolean;
+  domain?: string;
 }
 
 const accessTokenExpire = Number(process.env.ACCESS_TOKEN_EXPIRE) || 59;
@@ -24,6 +25,7 @@ export const accessTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
+  domain: ".onrender.com",
 };
 
 export const refreshTokenOptions: ITokenOptions = {
@@ -31,6 +33,7 @@ export const refreshTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction, // for production
+  domain: ".onrender.com",
 };
 
 export const hasLoggedInTokenOptions: ITokenOptions = {
@@ -38,6 +41,7 @@ export const hasLoggedInTokenOptions: ITokenOptions = {
   httpOnly: false, // client accessible
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
+  domain: ".onrender.com",
 };
 
 export const activationTokenOptions: ITokenOptions = {
@@ -45,6 +49,7 @@ export const activationTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
+  domain: ".onrender.com",
 };
 
 export const sendToken = async (
@@ -63,17 +68,17 @@ export const sendToken = async (
   ).getTime();
 
   // save the tokens in the cookie
-  // res.cookie("access_Tokenn", accessToken, accessTokenOptions);
-  // res.cookie("refresh_Tokenn", refreshToken, refreshTokenOptions);
-  // res.cookie("_can_logged_tt", loggedInToken, hasLoggedInTokenOptions);
+  res.cookie("access_Token", accessToken, accessTokenOptions);
+  res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
+  res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
+
+  res.setHeader("x-access-token", accessToken);
+  res.setHeader("x-refresh-token", refreshToken);
 
   res.apiSuccess(
     {
       user,
       expiresAt: accessTokenExpiresAt,
-      accessToken,
-      refreshToken,
-      loggedInToken,
     },
     "Logged in successfully",
     statusCode

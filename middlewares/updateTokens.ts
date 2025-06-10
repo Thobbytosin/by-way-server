@@ -57,10 +57,14 @@ export const updateTokens = catchAsyncError(
 
     //   save tokens in the response cookie
 
-    // res.cookie("access_Token", accessToken, accessTokenOptions);
-    // res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
-    // res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
-    req.tokens = { accessToken, loggedInToken, refreshToken };
+    res.cookie("access_Token", accessToken, accessTokenOptions);
+    res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
+    res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
+
+    res.setHeader("x-access-token", accessToken);
+    res.setHeader("x-refresh-token", refreshToken);
+
+    // req.tokens = { accessToken, loggedInToken, refreshToken };
     req.user = user;
     next();
   }
