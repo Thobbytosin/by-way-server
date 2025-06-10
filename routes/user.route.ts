@@ -6,6 +6,7 @@ import {
   getAllAdmins,
   getAllUsers,
   getAllUsersLatestInfo,
+  getUserCoursesSummary,
   getUserInfo,
   loginUser,
   logoutUser,
@@ -96,5 +97,11 @@ userRouter.put(
 userRouter.get("/get-users-list", getAllUsersLatestInfo);
 
 userRouter.get("/get-admin", getAdmin);
+
+userRouter.get(
+  "/get-user-courses-summary",
+  isUserAuthenticated,
+  getUserCoursesSummary
+);
 
 export default userRouter;

@@ -15,6 +15,7 @@ import {
 } from "../services/user.services";
 import cloudUploader, { cloudApi } from "../utils/cloudinary";
 import { isValidObjectId } from "mongoose";
+import Course, { ICourse } from "../models/course.model";
 
 dotenv.config();
 
@@ -544,5 +545,41 @@ export const refreshTokens = catchAsyncError(
       refreshToken,
       loggedInToken,
     });
+  }
+);
+
+// GET COURSES SUMMARY
+export const getUserCoursesSummary = catchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const loggedInUserId = req.user._id;
+
+    const user = await User.findById(loggedInUserId).lean();
+
+    if (!user || !user.courses) {
+      return res.status(404).json({ message: "User or courses not found" });
+    }
+
+    const results = await Promise.all(
+      user.courses.map(async (courseItem: any) => {
+        const course = await Course.findById(courseItem.courseId).lean();
+
+        if (!course) return null;
+
+        return {
+          id: course._id,
+          name: course.name,
+          thumbnail: course.thumbnail,
+          ratings: course.ratings,
+          purchase: course.purchase,
+          progress: courseItem.progress || [],
+          reviewed: courseItem.reviewed || false,
+        };
+      })
+    );
+
+    // Filter out any nulls (for courses that weren't found)
+    const filteredResults = results.filter((item) => item !== null);
+
+    res.apiSuccess(filteredResults);
   }
 );
