@@ -25,7 +25,6 @@ export const accessTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
-  domain: ".onrender.com",
 };
 
 export const refreshTokenOptions: ITokenOptions = {
@@ -33,7 +32,6 @@ export const refreshTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction, // for production
-  domain: ".onrender.com",
 };
 
 export const hasLoggedInTokenOptions: ITokenOptions = {
@@ -41,7 +39,6 @@ export const hasLoggedInTokenOptions: ITokenOptions = {
   httpOnly: false, // client accessible
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
-  domain: ".onrender.com",
 };
 
 export const activationTokenOptions: ITokenOptions = {
@@ -49,7 +46,6 @@ export const activationTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
-  domain: ".onrender.com",
 };
 
 export const sendToken = async (
