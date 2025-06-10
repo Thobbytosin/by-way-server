@@ -415,11 +415,7 @@ export const updateProfilePicture = catchAsyncError(
 
 export const getAllUsers = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      getALLUsersService(res);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    getALLUsersService(res);
   }
 );
 
@@ -454,18 +450,11 @@ export const getAdmin = catchAsyncError(
 
 export const updateUserRole = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { email, role } = req.body;
+    const { email, role }: { email: string; role: string } = req.body;
 
-      if (!email || !role) return next(new ErrorHandler("Invalid entry", 422));
+    if (!email || !role) return next(new ErrorHandler("Invalid entry", 422));
 
-      // if (!isValidObjectId(userId))
-      //   return next(new ErrorHandler("Invalid id", 422));
-
-      updateUserRoleService(res, email, role, next);
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    updateUserRoleService(res, email, role, next);
   }
 );
 
@@ -474,25 +463,11 @@ export const updateUserRole = catchAsyncError(
 
 export const deleteUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { userId } = req.params;
+    const { userId } = req.params;
 
-      // console.log(userId);
+    await User.findByIdAndDelete(userId);
 
-      const user = await User.findById(userId);
-
-      if (!user) return next(new ErrorHandler("User not found", 404));
-
-      await user.deleteOne();
-
-      // await redis.del(`user - ${userId}`);
-
-      res
-        .status(200)
-        .json({ success: true, message: "User deleted successfully" });
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(null, "User account deleted");
   }
 );
 

@@ -23,7 +23,7 @@ export const getUserId = async (res: Response, id: string) => {
 export const getALLUsersService = async (res: Response) => {
   const users = await User.find().sort({ createdAt: -1 });
 
-  res.status(200).json({ success: true, users });
+  res.apiSuccess(users, "Users fetched");
 };
 
 // get all admins
@@ -57,7 +57,5 @@ export const updateUserRoleService = async (
 
   if (!user) return next(new ErrorHandler("User not found", 404));
 
-  // await redis.set(`user - ${user.id}`, JSON.stringify(user));
-
-  res.status(200).json({ success: true, user });
+  res.apiSuccess(null, "Role updated", 201);
 };
