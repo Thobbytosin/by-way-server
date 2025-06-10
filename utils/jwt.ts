@@ -10,6 +10,7 @@ interface ITokenOptions {
   httpOnly: boolean;
   sameSite: "none" | "lax" | "strict";
   secure?: boolean;
+  domain?: string;
 }
 
 const accessTokenExpire = Number(process.env.ACCESS_TOKEN_EXPIRE) || 59;
@@ -38,6 +39,7 @@ export const hasLoggedInTokenOptions: ITokenOptions = {
   httpOnly: false, // client accessible
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
+  domain: ".onrender.com",
 };
 
 export const activationTokenOptions: ITokenOptions = {
