@@ -548,31 +548,7 @@ export const refreshTokens = catchAsyncError(
   }
 );
 
-//////////////////////////////////////////////////////////
-// export const getUserCoursesSummary = async (req, res) => {
-//   try {
-//     const userId = req.params.userId;
-
-//     // 1. Fetch the user with their courses array
-//     const user = await User.findById(userId).select("courses");
-
-//     if (!user || !user.courses || user.courses.length === 0) {
-//       return res.status(404).json({ message: "No courses found for this user" });
-//     }
-
-//     // 2. Extract only the courseIds
-//     const courseIds = user.courses.map((entry) => entry.courseId);
-
-//     // 3. Fetch only name and price for each course
-//     const courses = await Course.find({ _id: { $in: courseIds } }).select("name price");
-
-//     res.status(200).json({ data: courses });
-//   } catch (error) {
-//     console.error("Error fetching user courses:", error);
-//     res.status(500).json({ message: "Internal server error" });
-//   }
-// };
-
+// GET COURSES SUMMARY
 export const getUserCoursesSummary = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const loggedInUserId = req.user._id;
