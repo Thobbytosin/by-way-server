@@ -15,6 +15,7 @@ import {
 } from "../services/user.services";
 import cloudUploader, { cloudApi } from "../utils/cloudinary";
 import { isValidObjectId } from "mongoose";
+import Course, { ICourse } from "../models/course.model";
 
 dotenv.config();
 
@@ -544,5 +545,65 @@ export const refreshTokens = catchAsyncError(
       refreshToken,
       loggedInToken,
     });
+  }
+);
+
+//////////////////////////////////////////////////////////
+// export const getUserCoursesSummary = async (req, res) => {
+//   try {
+//     const userId = req.params.userId;
+
+//     // 1. Fetch the user with their courses array
+//     const user = await User.findById(userId).select("courses");
+
+//     if (!user || !user.courses || user.courses.length === 0) {
+//       return res.status(404).json({ message: "No courses found for this user" });
+//     }
+
+//     // 2. Extract only the courseIds
+//     const courseIds = user.courses.map((entry) => entry.courseId);
+
+//     // 3. Fetch only name and price for each course
+//     const courses = await Course.find({ _id: { $in: courseIds } }).select("name price");
+
+//     res.status(200).json({ data: courses });
+//   } catch (error) {
+//     console.error("Error fetching user courses:", error);
+//     res.status(500).json({ message: "Internal server error" });
+//   }
+// };
+
+export const getUserCoursesSummary = catchAsyncError(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const loggedInUserId = req.user._id;
+
+    const user = await User.findById(loggedInUserId).lean();
+
+    if (!user || !user.courses) {
+      return res.status(404).json({ message: "User or courses not found" });
+    }
+
+    const results = await Promise.all(
+      user.courses.map(async (courseItem: any) => {
+        const course = await Course.findById(courseItem.courseId).lean();
+
+        if (!course) return null;
+
+        return {
+          id: course._id,
+          name: course.name,
+          thumbnail: course.thumbnail,
+          ratings: course.ratings,
+          purchase: course.purchase,
+          progress: courseItem.progress || [],
+          reviewed: courseItem.reviewed || false,
+        };
+      })
+    );
+
+    // Filter out any nulls (for courses that weren't found)
+    const filteredResults = results.filter((item) => item !== null);
+
+    res.apiSuccess(filteredResults);
   }
 );
