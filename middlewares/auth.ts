@@ -10,6 +10,7 @@ dotenv.config();
 export const isUserAuthenticated = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     // check if user is logged in (check and verify access token)
+
     const { access_Token } = req.cookies;
 
     // if there is no access token

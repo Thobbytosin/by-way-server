@@ -25,6 +25,7 @@ export const accessTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
+  domain: ".onrender.com",
 };
 
 export const refreshTokenOptions: ITokenOptions = {
@@ -32,6 +33,7 @@ export const refreshTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction, // for production
+  domain: ".onrender.com",
 };
 
 export const hasLoggedInTokenOptions: ITokenOptions = {
@@ -47,6 +49,7 @@ export const activationTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
+  domain: ".onrender.com",
 };
 
 export const sendToken = async (
@@ -69,8 +72,14 @@ export const sendToken = async (
   res.cookie("refresh_Token", refreshToken, refreshTokenOptions);
   res.cookie("_can_logged_t", loggedInToken, hasLoggedInTokenOptions);
 
+  res.setHeader("x-access-token", accessToken);
+  res.setHeader("x-refresh-token", refreshToken);
+
   res.apiSuccess(
-    { user, expiresAt: accessTokenExpiresAt },
+    {
+      user,
+      expiresAt: accessTokenExpiresAt,
+    },
     "Logged in successfully",
     statusCode
   );
