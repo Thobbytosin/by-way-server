@@ -548,9 +548,6 @@ export const refreshTokens = catchAsyncError(
       success: true,
       message: "Tokens Refreshed",
       expiresAt: accessTokenExpiresAt,
-      accessToken,
-      refreshToken,
-      loggedInToken,
     });
   }
 );
