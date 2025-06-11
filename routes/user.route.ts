@@ -35,7 +35,7 @@ userRouter.post("/activate-user", activateUser);
 userRouter.post("/login", loginUser);
 
 // logout user
-userRouter.post("/logout", isUserAuthenticated, logoutUser);
+userRouter.post("/logout", logoutUser);
 
 // refresh  tokens  (to keep user logged in)
 userRouter.get("/refresh-tokens", updateTokens, refreshTokens);

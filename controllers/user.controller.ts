@@ -5,7 +5,12 @@ import catchAsyncError from "../middlewares/catchAsyncErrors";
 import jwt, { Secret } from "jsonwebtoken";
 import dotenv from "dotenv";
 import sendMail from "../utils/sendMail";
-import { accessTokenOptions, sendToken } from "../utils/jwt";
+import {
+  accessTokenOptions,
+  hasLoggedInTokenOptions,
+  refreshTokenOptions,
+  sendToken,
+} from "../utils/jwt";
 
 import {
   getALLUsersService,
@@ -175,9 +180,11 @@ export const loginUser = catchAsyncError(
 
 export const logoutUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    res.clearCookie("access_token");
-    res.clearCookie("refresh_token");
-    res.clearCookie("_can_logged_in");
+    res.clearCookie("access_token", accessTokenOptions);
+
+    res.clearCookie("refresh_token", refreshTokenOptions);
+
+    res.clearCookie("_can_logged_in", hasLoggedInTokenOptions);
 
     res.apiSuccess(null, "Logout successful");
   }
