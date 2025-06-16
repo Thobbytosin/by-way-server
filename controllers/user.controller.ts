@@ -2,16 +2,16 @@ import { Request, Response, NextFunction } from "express";
 import User, { IUser } from "../models/user.model";
 import ErrorHandler from "../utils/errorHandler";
 import catchAsyncError from "../middlewares/catchAsyncErrors";
-import jwt, { Secret } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import sendMail from "../utils/sendMail";
 import {
   accessTokenOptions,
+  activationTokenOptions,
   hasLoggedInTokenOptions,
   refreshTokenOptions,
-  sendToken,
 } from "../utils/jwt";
-
+import bcryptjs from "bcryptjs";
 import {
   getALLUsersService,
   getAllAdminsService,
@@ -20,7 +20,13 @@ import {
 } from "../services/user.services";
 import cloudUploader, { cloudApi } from "../utils/cloudinary";
 import { isValidObjectId } from "mongoose";
-import Course, { ICourse } from "../models/course.model";
+import Course from "../models/course.model";
+import {
+  createActivationToken,
+  isEmailValid,
+  isPasswordStrong,
+} from "../utils/helpers";
+import { sendToken, TUser } from "../services/signIn.service";
 
 dotenv.config();
 
@@ -37,15 +43,36 @@ export const registerUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, email, password } = req.body as IRegistration;
 
+    if (
+      !name ||
+      !email ||
+      !password ||
+      name.trim() === "" ||
+      email.trim() === "" ||
+      password.trim() === ""
+    ) {
+      return next(new ErrorHandler("All fields are required", 400));
+    }
+
+    if (!isEmailValid.test(email)) {
+      return next(new ErrorHandler("Please enter a valid email", 400));
+    }
+
+    if (!isPasswordStrong(password)) {
+      return next(new ErrorHandler("Password security is too weak", 400));
+    }
+
     const isEmailExists = await User.findOne({ email });
 
     if (isEmailExists)
       return next(new ErrorHandler("Email already exists", 400));
 
+    const hashedPassword = await bcryptjs.hash(password, 10);
+
     const user: IRegistration = {
       name,
       email,
-      password,
+      password: hashedPassword,
     };
 
     const activationToken = createActivationToken(user);
@@ -55,7 +82,11 @@ export const registerUser = catchAsyncError(
     const data = { user: { name: user.name }, activationCode };
 
     // save activation token in the response cookie
-    res.cookie("activation_Token", activationToken.token, accessTokenOptions);
+    res.cookie(
+      "activation_Token",
+      activationToken.token,
+      activationTokenOptions
+    );
 
     try {
       await sendMail({
@@ -65,34 +96,12 @@ export const registerUser = catchAsyncError(
         data,
       });
 
-      res.apiSuccess(
-        null,
-        `An activation token has been sent to your email: ${user.email}.`
-      );
+      res.apiSuccess(null, "An activation token has been sent to your email");
     } catch (error: any) {
       return next(new ErrorHandler("Something went wrong", 400));
     }
   }
 );
-
-interface IActivationToken {
-  token: string;
-  activationCode: string;
-}
-
-// function to create an activation token and activation code
-export const createActivationToken = (user: any): IActivationToken => {
-  const activationCode = Math.floor(1000 + Math.random() * 9000).toString();
-
-  // activation token to be used for email activation
-  const token = jwt.sign(
-    { user, activationCode },
-    process.env.ACTIVATION_SECRET as Secret,
-    { expiresIn: "5m" }
-  );
-
-  return { token, activationCode };
-};
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -130,7 +139,7 @@ export const activateUser = catchAsyncError(
       name,
       email,
       password,
-      emailVerified: true,
+      isVerified: true,
     });
 
     res.apiSuccess(null, "Account registered", 201);
@@ -156,22 +165,34 @@ export const loginUser = catchAsyncError(
 
     const user = await User.findOne({ email }).select("+password");
 
-    if (!user)
-      return next(new ErrorHandler("Invalid username or password", 404));
+    if (!user) return next(new ErrorHandler("Account not found", 404));
 
     // check if password matches
-    const isPasswordMatch = await user.comparePassword(password);
+    const isPasswordMatch = await bcryptjs.compare(password, user.password);
 
     if (!isPasswordMatch)
-      return next(new ErrorHandler("Invalid credentials", 404));
+      return next(new ErrorHandler("Invalid credentials", 401));
 
     // to avoid sending password
-    const userr = await User.findOne({ email });
+    const {
+      password: _,
+      __v: __,
+      createdAt: ___,
+      updatedAt: ____,
+      ...restOfUser
+    } = user.toObject();
 
-    if (!userr)
-      return next(new ErrorHandler("Invalid username or password", 404));
+    const formattedUser: TUser = {
+      _id: restOfUser._id as string,
+      avatar: restOfUser.avatar,
+      courses: restOfUser.courses,
+      email: restOfUser.email,
+      isVerified: restOfUser.isVerified,
+      name: restOfUser.name,
+      role: restOfUser.role,
+    };
 
-    sendToken(userr, 200, res);
+    sendToken(formattedUser, 200, res);
   }
 );
 
@@ -211,42 +232,48 @@ interface ISocialAuthBody {
 
 export const socialAuth = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { name, email, avatar } = req.body as ISocialAuthBody;
+    const { name, email, avatar } = req.body as ISocialAuthBody;
 
-      if (!name || !email || name.trim() === "" || email.trim() === "")
-        return next(new ErrorHandler("Please provide name and email", 400));
+    if (!name || !email || name.trim() === "" || email.trim() === "")
+      return next(new ErrorHandler("Please provide name and email", 400));
 
-      const user = await User.findOne({ email });
+    const user = await User.findOne({ email });
 
-      if (!user) {
-        // generate password (password is required for login)
+    if (!user) {
+      // generate password (password is required for login)
 
-        const generatePassword = Math.random().toString(36).slice(-10);
+      const generatePassword = Math.random().toString(36).slice(-10);
 
-        const newUser = await User.create({
-          name,
-          email,
-          password: generatePassword,
-          avatar,
-        });
-        // to remove the password from being sent to the frontend
-        const user = await User.findOne({ email: newUser.email }).select(
-          "-password"
-        );
+      const newUser = await User.create({
+        name,
+        email,
+        password: generatePassword,
+        avatar: { id: `${name}+${avatar}`, url: avatar },
+      });
 
-        if (!user) return next(new ErrorHandler("No user found", 404));
+      // login user
+      const {
+        password: _,
+        __v: __,
+        createdAt: ___,
+        updatedAt: ____,
+        ...restOfUser
+      } = newUser.toObject();
 
-        // login user
-        sendToken(user, 200, res);
-      } else {
-        // means user has an account already
+      sendToken(restOfUser as any, 200, res);
+    } else {
+      // means user has an account already
 
-        // so just login
-        sendToken(user, 200, res);
-      }
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
+      // to avoid sending password
+      const {
+        password: _,
+        __v: __,
+        createdAt: ___,
+        updatedAt: ____,
+        ...restOfUser
+      } = user.toObject();
+
+      sendToken(restOfUser as any, 200, res);
     }
   }
 );
@@ -312,7 +339,14 @@ export const updatePassword = catchAsyncError(
 
       if (!user) return next(new ErrorHandler("Invalid user", 404));
 
-      const isPasswordMatch = await user.comparePassword(oldPassword);
+      // check if password matches
+      const isPasswordMatch = await bcryptjs.compare(
+        oldPassword,
+        user.password
+      );
+
+      if (!isPasswordMatch)
+        return next(new ErrorHandler("Invalid credentials", 404));
 
       if (!isPasswordMatch)
         return next(new ErrorHandler("Invalid old password", 400));
@@ -536,19 +570,12 @@ export const markVideoAsViewed = catchAsyncError(
 // REFRESH TOKENS
 export const refreshTokens = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
-    const { accessToken, loggedInToken, refreshToken } = req.tokens;
-
     // accessToken expires in
     const accessTokenExpiresAt = new Date(
       Date.now() + accessTokenOptions.maxAge
     ).getTime();
 
-    res.status(200).json({
-      success: true,
-      message: "Tokens Refreshed",
-      expiresAt: accessTokenExpiresAt,
-    });
+    res.apiSuccess({ expiresAt: accessTokenExpiresAt }, "Tokens Refreshed");
   }
 );
 

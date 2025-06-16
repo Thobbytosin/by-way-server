@@ -12,6 +12,8 @@ import layoutRouter from "./routes/layout.route";
 import { rateLimit } from "express-rate-limit";
 import mongoose from "mongoose";
 import responseFormatter from "./middlewares/responseFormatter";
+import { checkCookieConsent } from "./middlewares/cookie-consent";
+import { limiter } from "./middlewares/rateLimit";
 
 export const app = express();
 dotenv.config();
@@ -41,15 +43,6 @@ app.use(
 
 // app.use(cors());
 
-// rateLimit middleware
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
-  standardHeaders: "draft-7", // draft-6: `RateLimit-*` headers; draft-7: combined `RateLimit` header
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers.
-  // store: ... , // Redis, Memcached, etc. See below.
-});
-
 app.get("/api/v1/health", (_, res) => {
   res.status(200).json({
     status: "OK",
@@ -77,6 +70,12 @@ app.get("/api/v1/ui-health", (_, res) => {
 
 app.use(responseFormatter);
 
+// Apply the rate limiting middleware to all requests.
+app.use(limiter);
+
+// check consent on all routes
+app.use(checkCookieConsent);
+
 // ROUTES
 app.use("/api/v1", userRouter);
 app.use("/api/v1", courseRouter);
@@ -96,10 +95,6 @@ app.all("*", (req, res, next) => {
   err.statusCode = 400;
   next(err);
 });
-
-// middleware calls
-// Apply the rate limiting middleware to all requests.
-app.use(limiter);
 
 // error middleware on all requests
 app.use(ErrorMiddleware);

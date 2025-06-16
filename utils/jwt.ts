@@ -1,7 +1,5 @@
 import dotenv from "dotenv";
 // import { redis } from "./redis";
-import { IUser } from "../models/user.model";
-import { Response } from "express";
 
 dotenv.config();
 
@@ -13,11 +11,11 @@ interface ITokenOptions {
   domain?: string;
 }
 
-const accessTokenExpire = Number(process.env.ACCESS_TOKEN_EXPIRE) || 59;
+export const accessTokenExpire = Number(process.env.ACCESS_TOKEN_EXPIRE) || 59;
 
-const refreshTokenExpire = Number(process.env.REFRESH_TOKEN_EXPIRE) || 7;
+export const refreshTokenExpire = Number(process.env.REFRESH_TOKEN_EXPIRE) || 7;
 
-const isProduction = process.env.NODE_ENV === "production";
+export const isProduction = process.env.NODE_ENV === "production";
 
 //   options for cookies
 export const accessTokenOptions: ITokenOptions = {
@@ -46,42 +44,4 @@ export const activationTokenOptions: ITokenOptions = {
   httpOnly: true,
   sameSite: isProduction ? "none" : "lax",
   secure: isProduction,
-};
-
-export const sendToken = async (
-  user: IUser,
-  statusCode: number,
-  res: Response
-) => {
-  // login with access and refresh token
-  const accessToken = user.SignAccessToken();
-  const refreshToken = user.SignRefreshToken();
-  const loggedInToken = process.env.LOGGED_IN_TOKEN;
-
-  // accessToken expires in
-  const accessTokenExpiresAt = new Date(
-    Date.now() + accessTokenOptions.maxAge
-  ).getTime();
-
-  // save the tokens in the cookie
-  res.cookie("access_token", accessToken, accessTokenOptions);
-  res.cookie("refresh_token", refreshToken, refreshTokenOptions);
-  res.cookie("_can_logged_in", loggedInToken, hasLoggedInTokenOptions);
-
-  // res.setHeader("x-access-token", accessToken);
-  // res.setHeader("x-refresh-token", refreshToken);
-
-  res.apiSuccess(
-    {
-      user,
-      expiresAt: accessTokenExpiresAt,
-    },
-    "Logged in successfully",
-    statusCode
-  );
-  // res.status(statusCode).json({
-  //   success: true,
-  //   user,
-  //   expiresAt: accessTokenExpiresAt,
-  // });
 };
