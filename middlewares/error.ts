@@ -36,8 +36,8 @@ const ErrorMiddleware = (
 
   //   jwt token expired error
   if (err.name === "TokenExpiredError" || err.message === "TokenExpiredError") {
-    const message = `Token has expired, try again.`;
-    err = new ErrorHandler(message, 400);
+    const message = `Session has ended. Please login.`;
+    err = new ErrorHandler(message, 401);
   }
 
   res.apiError(err);
