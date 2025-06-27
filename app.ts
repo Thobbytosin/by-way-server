@@ -29,7 +29,7 @@ app.use(express.urlencoded({ extended: false }));
 
 const allowedOrigins = [
   process.env.NODE_ENV === "development" && "http://localhost:3000",
-  "https://e-learning-edu.onrender.com",
+  "https://edu-learning-liard.vercel.app",
 ].filter(Boolean);
 
 //CORS - cross-origin resource sharing
