@@ -9,6 +9,7 @@ import {
   logoutUser,
   refreshTokens,
   registerUser,
+  updateUserInfo,
 } from "./controllers/user.controller";
 import { checkCookieConsent } from "./middlewares/cookie-consent";
 import mongoose from "mongoose";
@@ -62,6 +63,7 @@ export const createTestApp = () => {
 
   // USERS
   appTest.get("/api/v1/me", isUserAuthenticated, getUserInfo);
+  appTest.put("/api/v1/update-user-info", isUserAuthenticated, updateUserInfo);
 
   // unknown route
   appTest.all("*", (req, res, next) => {

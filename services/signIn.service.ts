@@ -52,8 +52,6 @@ export const sendToken = async (
   res.cookie("refresh_token", refreshToken, refreshTokenOptions);
   res.cookie("_can_logged_in", loggedInToken, hasLoggedInTokenOptions);
 
-  console.log(accessTokenExpiresAt);
-
   res.apiSuccess(
     {
       user,
