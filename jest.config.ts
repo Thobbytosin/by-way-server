@@ -3,11 +3,6 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "node",
-  globals: {
-    "ts-jest": {
-      tsconfig: "tsconfig.test.json",
-    },
-  },
   roots: ["<rootDir>/tests", "<rootDir>/controllers", "<rootDir>/routes"], // Customize as needed
   moduleNameMapper: {
     "^@controllers/(.*)$": "<rootDir>/controllers/$1",

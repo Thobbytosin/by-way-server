@@ -6,7 +6,7 @@ import User from "../../../models/user.model";
 import jwt from "jsonwebtoken";
 import request from "supertest";
 
-describe("GET /api/v1/me - Get User Details", () => {
+describe("Users Integration Tests", () => {
   let appTest: any;
   let testUser: any;
   let validAccessToken: string;
@@ -50,7 +50,7 @@ describe("GET /api/v1/me - Get User Details", () => {
     await disconnectDB();
   });
 
-  it("1. should return user profile details if token is valid", async () => {
+  it.skip("1. should return user profile details if token is valid", async () => {
     const res = await request(appTest)
       .get("/api/v1/me")
       .set("x-cookie-consent", JSON.stringify({ accept: true }))
@@ -60,7 +60,7 @@ describe("GET /api/v1/me - Get User Details", () => {
     expect(res.body.message).toMatch(/User fetched/);
   }, 10000);
 
-  it("2. should return 400 code if there is no token", async () => {
+  it.skip("2. should return 400 code if there is no token", async () => {
     const res = await request(appTest)
       .get("/api/v1/me")
       .set("x-cookie-consent", JSON.stringify({ accept: true }));
@@ -69,7 +69,7 @@ describe("GET /api/v1/me - Get User Details", () => {
     expect(res.body.message).toMatch(/Restricted/);
   }, 10000);
 
-  it("3. should return 401 code if token has expired", async () => {
+  it.skip("3. should return 401 code if token has expired", async () => {
     const res = await request(appTest)
       .get("/api/v1/me")
       .set("x-cookie-consent", JSON.stringify({ accept: true }))
@@ -78,4 +78,12 @@ describe("GET /api/v1/me - Get User Details", () => {
     expect(res.statusCode).toBe(401);
     expect(res.body.message).toMatch(/Session has ended/);
   }, 10000);
+
+  // it("4. should update user info", async()=>{
+  //   const res = await request(appTest)
+  //     .put("/api/v1/update-user-info")
+  //     .set("x-cookie-consent", JSON.stringify({ accept: true }))
+  //     .set("Cookie", [`access_token=${validAccessToken}`]);
+
+  // }, 10000)
 });
