@@ -14,6 +14,8 @@ import mongoose from "mongoose";
 import responseFormatter from "./middlewares/responseFormatter";
 import { checkCookieConsent } from "./middlewares/cookie-consent";
 import { limiter } from "./middlewares/rateLimit";
+import swaggerUi from "swagger-ui-express";
+import swaggerDocument from "./docs/swaggerDocument";
 
 export const app = express();
 dotenv.config();
@@ -41,7 +43,19 @@ app.use(
   })
 );
 
-// app.use(cors());
+// API DOCUMENTATION
+app.use(
+  "/api/v1/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    swaggerOptions: {
+      requestInterceptor: (req: any) => {
+        req.credentials = "include";
+        return req;
+      },
+    },
+  })
+);
 
 app.get("/api/v1/health", (_, res) => {
   res.status(200).json({

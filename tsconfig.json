@@ -10,5 +10,5 @@
     "skipLibCheck": true
   },
   "include": ["**/*.ts"],
-  "exclude": ["tests", "jest.config.ts", "app-test.ts"]
+  "exclude": ["tests", "jest.config.ts", "app-test.ts", "docs"]
 }

@@ -25,7 +25,7 @@ class ApiResponse {
     message?: string;
     statusCode?: number;
   }) {
-    return new ApiResponse(false, message, null, statusCode);
+    return new ApiResponse(false, message, undefined, statusCode);
   }
 }
 
