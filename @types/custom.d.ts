@@ -18,7 +18,7 @@ declare global {
     interface Response {
       apiSuccess<T = any>(data: T, message?: string, statusCode?: number): void;
 
-      apiError(error: ErrorHandler, statusCode?: number): void;
+      apiError(error: ErrorHandler): void;
     }
   }
 }

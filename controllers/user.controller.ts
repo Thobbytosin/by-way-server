@@ -65,7 +65,7 @@ export const registerUser = catchAsyncError(
     const isEmailExists = await User.findOne({ email });
 
     if (isEmailExists)
-      return next(new ErrorHandler("Email already exists", 400));
+      return next(new ErrorHandler("Email already exists", 409));
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
@@ -98,7 +98,7 @@ export const registerUser = catchAsyncError(
 
       res.apiSuccess(null, "An activation token has been sent to your email");
     } catch (error: any) {
-      return next(new ErrorHandler("Something went wrong", 400));
+      return next(new ErrorHandler("Failed to send mail", 400));
     }
   }
 );

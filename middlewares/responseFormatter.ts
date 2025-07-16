@@ -13,9 +13,12 @@ const responseFormatter = (req: Request, res: Response, next: NextFunction) => {
     );
   };
 
-  res.apiError = function (error, statusCode = error.statusCode || 500) {
-    this.status(statusCode).json(
-      ApiResponse.error({ message: error.message, statusCode })
+  res.apiError = function (error) {
+    this.status(error.statusCode).json(
+      ApiResponse.error({
+        message: error.message,
+        statusCode: error.statusCode,
+      })
     );
   };
 
