@@ -1,23 +1,39 @@
-# Step 1: Use an official Node.js image as the base image
-FROM node:18
 
-# Step 2: Set the working directory inside the container
+# -------- STAGE 1: Builder --------
+FROM node:18 AS builder
+
+# Set working directory
 WORKDIR /app
 
-# Step 3: Copy the package.json and package-lock.json into the container
-COPY package*.json ./
+# update environment
+ENV NODE_ENV=production
 
-# Step 4: Install dependencies
+# Copy dependency files and install all dependencies
+COPY package*.json ./
 RUN npm install
 
-# Step 5: Copy the rest of the server code into the container
+# Copy the entire app (TypeScript source)
 COPY . .
 
-# Step 5.1: Build the TypeScript code
+# Build TypeScript (and optionally copy other folders like mails)
 RUN npm run build
 
-# Step 6: Expose the port the app will run on (replace with your actual port)
+# -------- STAGE 2: Production Image --------
+FROM node:18
+
+WORKDIR /app
+
+# Copy only production dependencies
+COPY package*.json ./
+RUN npm install --only=production
+
+# Copy built files and required runtime assets from builder
+COPY --from=builder /app/build ./build
+COPY --from=builder /app/mails ./mails
+
+# Expose the server port
 EXPOSE 8000
 
-# Step 7: Define the command to run the server
-CMD ["npm", "start"]
+# Start the server
+CMD ["node", "build/server.js"]
+
