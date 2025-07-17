@@ -10,14 +10,14 @@ const server = http.createServer(app);
 // to access environment variables in server
 dotenv.config();
 
-const PORT = process.env.PORT || 8000;
-// const HOST = "192.168.45.227"; // for calling mobile
+const PORT = parseInt(process.env.PORT || "8000", 10);
+const HOST = "0.0.0.0" as string; // for calling mobile
 
 // start socket server
 initSocketServer(server);
 
 // create server
-server.listen(PORT, () => {
+server.listen(PORT, HOST, () => {
   console.log(`Application is running on port ${PORT}`);
   connectDB();
 });
