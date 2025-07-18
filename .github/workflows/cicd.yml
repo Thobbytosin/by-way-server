@@ -126,7 +126,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: 22
           script: |
-            echo "✅ Connected to EC2"
+            echo "✅ Connected to AWS EC2"
             cd ~/by-way-server
             git pull origin master
             docker-compose -f docker-compose.server.yml down
