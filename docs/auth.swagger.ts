@@ -28,7 +28,7 @@ const authSwagger = {
       },
       responses: {
         200: {
-          description: "Account Verification Code sent",
+          description: "OK",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/SuccessResponse" },
@@ -48,7 +48,7 @@ const authSwagger = {
           },
         },
         400: {
-          description: "Bad Requests",
+          description: "Bad Request",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
@@ -174,7 +174,7 @@ const authSwagger = {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
                 missingVerificationCode: {
-                  summary: "Expired verification code",
+                  summary: "Account not found",
                   value: {
                     success: false,
                     message: "Verification code has expired",
@@ -235,8 +235,8 @@ const authSwagger = {
   },
   "/login": {
     post: {
-      summary: "Verify User Email",
-      operationId: "verifyEmail",
+      summary: "Login User",
+      operationId: "loginUser",
       tags: ["Authentication"],
       parameters: [
         {
@@ -252,7 +252,7 @@ const authSwagger = {
       ],
       security: [
         {
-          cookieVerification: [],
+          cookieAuth: [],
         },
       ],
       requestBody: {
@@ -260,14 +260,14 @@ const authSwagger = {
         content: {
           "application/json": {
             schema: {
-              $ref: "#/components/schemas/AccountVerfification",
+              $ref: "#/components/schemas/UserSignin",
             },
           },
         },
       },
       responses: {
-        201: {
-          description: "Created",
+        200: {
+          description: "OK",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/SuccessResponse" },
@@ -285,43 +285,17 @@ const authSwagger = {
             },
           },
         },
-        401: {
-          description: "Unauthorized",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/ErrorResponse" },
-              examples: {
-                missingVerificationCode: {
-                  summary: "Expired verification code",
-                  value: {
-                    success: false,
-                    message: "Verification code has expired",
-                    statusCode: 401,
-                  },
-                },
-                expiredSession: {
-                  summary: "Expired Session",
-                  value: {
-                    success: false,
-                    message: "Session has ended.",
-                    statusCode: 401,
-                  },
-                },
-              },
-            },
-          },
-        },
         400: {
           description: "Bad Request",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                erroresponse: {
-                  summary: "Invalid verification code",
+                missingFields: {
+                  summary: "Missing required fields",
                   value: {
                     success: false,
-                    message: "Invalid verification code",
+                    message: "Please enter your email and password",
                     statusCode: 400,
                   },
                 },
@@ -329,18 +303,36 @@ const authSwagger = {
             },
           },
         },
-        409: {
-          description: "Conflict",
+        401: {
+          description: "Unauthorized",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                erroresponse: {
-                  summary: "Account already exists",
+                wrongCredentials: {
+                  summary: "Invalid credentials",
                   value: {
                     success: false,
-                    message: "Account already exists",
-                    statusCode: 409,
+                    message: "Invalid credentials.",
+                    statusCode: 401,
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Not Found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                accountNotFound: {
+                  summary: "Account not found",
+                  value: {
+                    success: false,
+                    message: "Account not found",
+                    statusCode: 404,
                   },
                 },
               },

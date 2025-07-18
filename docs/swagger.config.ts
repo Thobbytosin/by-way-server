@@ -5,6 +5,7 @@ import {
   accountVerfification,
   errorResponse,
   successResponse,
+  userSignin,
 } from "./schemas";
 import {
   cookieAuth,
@@ -54,6 +55,7 @@ const swaggerConfig = {
       SuccessResponse: successResponse,
       ErrorResponse: errorResponse,
       UserSignup: userSignup,
+      UserSignin: userSignin,
       AccountVerfification: accountVerfification,
     },
     responses: {

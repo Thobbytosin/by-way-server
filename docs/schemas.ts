@@ -69,3 +69,20 @@ export const errorResponse = {
     },
   },
 };
+
+export const userSignin = {
+  type: "object",
+  required: [, "email", "password"],
+  properties: {
+    email: {
+      type: "string",
+      format: "email",
+      example: "john@example.com",
+    },
+    password: {
+      type: "string",
+      format: "password",
+      example: "SecurePassword123!",
+    },
+  },
+};
