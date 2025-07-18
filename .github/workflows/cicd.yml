@@ -111,6 +111,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
 
+      - name: Test SSH key format
+        run: |
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | ssh-keygen -y -f - > /dev/null && echo "✅ SSH key is valid" || echo "❌ Invalid SSH key"
+
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -119,6 +123,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            echo "✅ Connected to EC2"
             cd ~/by-way-server
             git pull origin master
             docker-compose -f docker-compose.server.yml down
