@@ -31,16 +31,16 @@ const authSwagger = {
           description: "Account Verification Code sent",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  message: {
-                    type: "string",
-                    example: "An activation token has been sent to your email",
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Successful Verification code sent",
+                  value: {
+                    success: true,
+                    message:
+                      "A 6-digit verification code has been sent to your email.",
+                    data: null,
+                    statusCode: 200,
                   },
                 },
               },
@@ -105,6 +105,7 @@ const authSwagger = {
                     example:
                       "Account already exists. Please proceed to sign in to your account",
                   },
+                  statusCode: { type: "number", example: 409 },
                 },
               },
             },
@@ -114,10 +115,10 @@ const authSwagger = {
       },
     },
   },
-  "/auth/account-verification": {
+  "/activate-user": {
     post: {
-      summary: "Verify User Account",
-      operationId: "verifyAccount",
+      summary: "Verify User Email",
+      operationId: "verifyEmail",
       tags: ["Authentication"],
       parameters: [
         {
@@ -148,58 +149,18 @@ const authSwagger = {
       },
       responses: {
         201: {
-          description: "Account Verification Code sent",
+          description: "Created",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  message: {
-                    type: "string",
-                    example:
-                      "A 6-digit verification code has been sent to your email address",
-                  },
-                },
-              },
-            },
-          },
-        },
-        400: {
-          description: "Bad Requests",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
               examples: {
-                missingFields: {
-                  summary: "Missing required fields",
+                successResponse: {
+                  summary: "Account Verification Success",
                   value: {
-                    success: false,
-                    message: "All fields are required",
-                  },
-                },
-                verifyingError: {
-                  summary: "Error verifying user: Something went wrong",
-                  value: {
-                    success: false,
-                    message: "Error verifying user: Something went wrong",
-                  },
-                },
-                validatingError: {
-                  summary: "Error validating your account. Try again",
-                  value: {
-                    success: false,
-                    message: "Error validating your account. Try again",
-                  },
-                },
-                failedSuccessMail: {
-                  summary: "Verification success mail failed",
-                  value: {
-                    success: false,
-                    message: "Falied to send verification success mail",
+                    success: true,
+                    message: "Account verified successfully",
+                    data: null,
+                    statusCode: 201,
                   },
                 },
               },
@@ -207,59 +168,43 @@ const authSwagger = {
           },
         },
         401: {
-          description: "Verification code expired",
+          description: "Unauthorized",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missingVerificationCode: {
+                  summary: "Expired verification code",
+                  value: {
+                    success: false,
+                    message: "Verification code has expired",
+                    statusCode: 401,
                   },
-                  message: {
-                    type: "string",
-                    example: "Verification code has expired",
+                },
+                expiredSession: {
+                  summary: "Expired Session",
+                  value: {
+                    success: false,
+                    message: "Session has ended.",
+                    statusCode: 401,
                   },
                 },
               },
             },
           },
         },
-        403: {
-          description: "Invalid Verification Token",
+        400: {
+          description: "Bad Request",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  message: {
-                    type: "string",
-                    example: "Access Denied: Invalid Verification code",
-                  },
-                },
-              },
-            },
-          },
-        },
-        404: {
-          description: "Account not found",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  message: {
-                    type: "string",
-                    example: "Error processing acocount: Account not found",
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                erroresponse: {
+                  summary: "Invalid verification code",
+                  value: {
+                    success: false,
+                    message: "Invalid verification code",
+                    statusCode: 400,
                   },
                 },
               },
@@ -270,17 +215,14 @@ const authSwagger = {
           description: "Conflict",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  message: {
-                    type: "string",
-                    example:
-                      "Account already exists. Please proceed to sign in to your account",
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                erroresponse: {
+                  summary: "Account already exists",
+                  value: {
+                    success: false,
+                    message: "Account already exists",
+                    statusCode: 409,
                   },
                 },
               },
@@ -291,10 +233,10 @@ const authSwagger = {
       },
     },
   },
-  "/auth/resend-verification-code": {
+  "/login": {
     post: {
-      summary: "Resend verification code",
-      operationId: "resend-verification-code",
+      summary: "Verify User Email",
+      operationId: "verifyEmail",
       tags: ["Authentication"],
       parameters: [
         {
@@ -313,42 +255,30 @@ const authSwagger = {
           cookieVerification: [],
         },
       ],
-      responses: {
-        200: {
-          description: "New account verification Code re-sent",
-          content: {
-            "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  message: {
-                    type: "string",
-                    example:
-                      "A new 6-digit verification code has been re-sent to your email address",
-                  },
-                },
-              },
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/AccountVerfification",
             },
           },
         },
-        400: {
-          description: "Falied to re-send verification mail",
+      },
+      responses: {
+        201: {
+          description: "Created",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  message: {
-                    type: "string",
-                    example: "Falied to re-send verification mail",
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Account Verification Success",
+                  value: {
+                    success: true,
+                    message: "Account verified successfully",
+                    data: null,
+                    statusCode: 201,
                   },
                 },
               },
@@ -356,30 +286,43 @@ const authSwagger = {
           },
         },
         401: {
-          description: "New Verification Token Issues",
+          description: "Unauthorized",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                missingOldVerfication: {
-                  summary: "Old verification token expired",
+                missingVerificationCode: {
+                  summary: "Expired verification code",
                   value: {
                     success: false,
-                    message: "Session has expired. Try Again",
+                    message: "Verification code has expired",
+                    statusCode: 401,
                   },
                 },
-                sessionEnded: {
-                  summary: "Old verification token expired",
+                expiredSession: {
+                  summary: "Expired Session",
                   value: {
                     success: false,
-                    message: "Session has ended",
+                    message: "Session has ended.",
+                    statusCode: 401,
                   },
                 },
-                failedVerificationMail: {
-                  summary: "Verification mail failed",
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                erroresponse: {
+                  summary: "Invalid verification code",
                   value: {
                     success: false,
-                    message: "Falied to send verification mail",
+                    message: "Invalid verification code",
+                    statusCode: 400,
                   },
                 },
               },
@@ -390,17 +333,14 @@ const authSwagger = {
           description: "Conflict",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  message: {
-                    type: "string",
-                    example:
-                      "Account already exists. Please proceed to sign in to your account",
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                erroresponse: {
+                  summary: "Account already exists",
+                  value: {
+                    success: false,
+                    message: "Account already exists",
+                    statusCode: 409,
                   },
                 },
               },

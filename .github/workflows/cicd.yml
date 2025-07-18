@@ -1,12 +1,9 @@
-name: Automated CI/CD Pipeline
+name: Deploy to AWS EC2
 
 on:
   push:
     branches:
       - master
-  # pull_request:
-  #   branches:
-  #     - master
 
 jobs:
   build:
@@ -101,74 +98,28 @@ jobs:
           fi
 
       - name: Build Docker image
-        run: docker build -t e-learning-server .
-
-      - name: Run Docker container with GitHub Secrets
-        run: |
-          echo "🚀 Starting Docker container..."
-          container_id=$(docker run -d \
-            -p 8000:8000 \
-            --health-cmd="curl -f http://localhost:8000/api/v1/health || exit 1" \
-            --health-interval=5s \
-            --health-retries=3 \
-            --health-start-period=5s \
-            --name temp_elearning_container \
-            e-learning-server)
-
-          echo "🕒 Waiting for container to boot up..."
-
-          for i in {1..6}; do
-            container_status=$(docker inspect --format='{{.State.Health.Status}}' "$container_id")
-            echo "Health status: $container_status"
-            if [ "$container_status" == "healthy" ]; then
-              break
-            fi
-            sleep 5
-          done
-
-          echo "📦 Container ID: $container_id"
-          echo "🔍 Final Container Health Status: $container_status"
-
-          echo "🔍 Checking logs..."
-          logs=$(docker logs "$container_id" 2>&1)
-          echo "$logs"
-
-          if [ "$container_status" == "healthy" ]; then
-            echo "✅ Container passed health checks!"
-          else
-            echo "❌ Container failed with status: $container_status"
-            echo "🛑 Problem areas detected:"
-            grep -Ei "error|fail|exception|timeout|refused" <<< "$logs" || echo "No explicit errors found in logs"
-            docker stop "$container_id"
-            docker rm "$container_id"
-            exit 1
-          fi
-
-          docker stop "$container_id"
-          docker rm "$container_id"
+        run: docker build -t by-way-server .
 
       - name: Confirm Successful build
         if: success()
         run: echo "Build job success"
 
   deploy:
-    needs: build
     runs-on: ubuntu-latest
-    permissions:
-      deployments: write
+
     steps:
-      - name: Deploy to Render
-        uses: johnbeynon/render-deploy-action@v0.0.8
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          service-id: ${{secrets.RENDER_SERVICE_ID}}
-          api-key: ${{secrets.RENDER_API_KEY}}
-
-      - name: Check Deployment Response
-        if: failure() # This will only run if the previous step fails
-        run: |
-          echo "❌ Deployment failed! Exiting..."
-          exit 1
-
-      - name: Confirm Deployment Success
-        if: success() # This ensures it only runs on success
-        run: echo "✅ Deployment completed successfully!"
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd ~/by-way-server
+            git pull origin master
+            docker-compose -f docker-compose.server.yml down
+            docker-compose -f docker-compose.server.yml up --build -d

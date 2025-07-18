@@ -8,7 +8,7 @@ const ErrorMiddleware = (
   next: NextFunction
 ) => {
   err.statusCode = err?.statusCode || 500;
-  err.message = err?.message || "Internal Server Error";
+  err.message = err?.message || "Internal server error. Please try again";
 
   // wrong mongodb id error
   if (err.message === "CastError") {
@@ -36,7 +36,7 @@ const ErrorMiddleware = (
 
   //   jwt token expired error
   if (err.name === "TokenExpiredError" || err.message === "TokenExpiredError") {
-    const message = `Session has ended. Please login.`;
+    const message = `Session has ended.`;
     err = new ErrorHandler(message, 401);
   }
 

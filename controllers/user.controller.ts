@@ -65,7 +65,12 @@ export const registerUser = catchAsyncError(
     const isEmailExists = await User.findOne({ email });
 
     if (isEmailExists)
-      return next(new ErrorHandler("Email already exists", 409));
+      return next(
+        new ErrorHandler(
+          "Account already exists. Please proceed to sign in to your account",
+          409
+        )
+      );
 
     const hashedPassword = await bcryptjs.hash(password, 10);
 
@@ -96,7 +101,10 @@ export const registerUser = catchAsyncError(
         data,
       });
 
-      res.apiSuccess(null, "An activation token has been sent to your email");
+      res.apiSuccess(
+        null,
+        "A 6-digit verification code has been sent to your email."
+      );
     } catch (error: any) {
       return next(new ErrorHandler("Failed to send mail", 400));
     }
@@ -117,7 +125,7 @@ export const activateUser = catchAsyncError(
     const activationToken = req.cookies.activation_Token;
 
     if (!activationToken) {
-      return next(new ErrorHandler("Activation code has expired", 401));
+      return next(new ErrorHandler("Verification code has expired", 401));
     }
 
     const newUser: { user: IUser; activationCode: string } = jwt.verify(
@@ -126,14 +134,14 @@ export const activateUser = catchAsyncError(
     ) as { user: IUser; activationCode: string };
 
     if (newUser.activationCode !== activationCode)
-      return next(new ErrorHandler("Invalid activation code", 422));
+      return next(new ErrorHandler("Invalid verification code", 400));
 
     const { name, email, password } = newUser.user;
 
     const userExists = await User.findOne({ email });
 
     if (userExists)
-      return next(new ErrorHandler("Account already exists", 422));
+      return next(new ErrorHandler("Account already exists", 409));
 
     await User.create({
       name,
@@ -142,7 +150,7 @@ export const activateUser = catchAsyncError(
       isVerified: true,
     });
 
-    res.apiSuccess(null, "Account registered", 201);
+    res.apiSuccess(null, "Account verified successfully", 201);
   }
 );
 
