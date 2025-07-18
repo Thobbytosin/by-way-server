@@ -113,7 +113,10 @@ jobs:
 
       - name: Test SSH key format
         run: |
-          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" | ssh-keygen -y -f - > /dev/null && echo "✅ SSH key is valid" || echo "❌ Invalid SSH key"
+          echo "${{ secrets.EC2_SSH_PRIVATE_KEY }}" > test_key.pem
+          chmod 600 test_key.pem
+          ssh-keygen -y -f test_key.pem > /dev/null && echo "✅ SSH key is valid" || echo "❌ Invalid SSH key"
+          rm test_key.pem
 
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
