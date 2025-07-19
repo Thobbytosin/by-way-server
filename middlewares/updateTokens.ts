@@ -20,7 +20,7 @@ export const updateTokens = catchAsyncError(
     const { refresh_token } = req.cookies;
     // if there is no refresh token
     if (!refresh_token)
-      return next(new ErrorHandler("Session has ended. Please login", 400));
+      return next(new ErrorHandler("Token is required.", 400));
 
     // verify if token is valid
     const decode = jwt.verify(
@@ -28,25 +28,21 @@ export const updateTokens = catchAsyncError(
       process.env.REFRESH_TOKEN_SIGN_IN as string
     ) as { id: string };
 
-    if (!decode.id)
-      return next(new ErrorHandler("Session has ended. Please login.", 401));
-
     const user = await User.findById(decode.id);
 
-    if (!user)
-      return next(new ErrorHandler("Please login to access this", 404));
+    if (!user) return next(new ErrorHandler("Account not found", 404));
 
     // generate new access and refresh tokens
     const accessToken = jwt.sign(
       { id: user._id },
       process.env.ACCESS_TOKEN_SIGN_IN as string,
-      { expiresIn: `${accessTokenExpire as any}m` || "59m" }
+      { expiresIn: `${accessTokenExpire as any}m` }
     );
 
     const refreshToken = jwt.sign(
       { id: user._id },
       process.env.REFRESH_TOKEN_SIGN_IN as string,
-      { expiresIn: `${refreshTokenExpire as any}d` || "7d" }
+      { expiresIn: `${refreshTokenExpire as any}d` }
     );
 
     req.user = user;

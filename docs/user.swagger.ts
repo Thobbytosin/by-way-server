@@ -1,8 +1,8 @@
 const userSwagger = {
-  "/user/me": {
+  "/me": {
     get: {
-      summary: "Get Logged-in User's data",
-      operationId: "getLoggedInUser",
+      summary: "User Details",
+      operationId: "user-details",
       tags: ["User"],
       parameters: [
         {
@@ -23,75 +23,47 @@ const userSwagger = {
       ],
       responses: {
         200: {
-          description: "Success - Returns user data",
+          description: "OK",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: true,
-                  },
-                  user: {
-                    type: "object",
-                    properties: {
-                      id: {
-                        type: "string",
-                        example: "647bf9e1b5fba927a8c8e123",
-                      },
-                      name: {
-                        type: "string",
-                        example: "John Doe",
-                      },
-                      email: {
-                        type: "string",
-                        format: "email",
-                        example: "john.doe@example.com",
-                      },
-                      role: {
-                        type: "string",
-                        enum: ["user", "patient", "doctor", "admin"],
-                        example: "user",
-                      },
-                      signedInAs: {
-                        type: "string",
-                        enum: ["user", "doctor"],
-                        example: "user",
-                      },
-                      doctorId: {
-                        type: "",
-                        example: null,
-                      },
-                      lastLogin: {
-                        type: "string",
-                        format: "date-time",
-                        example: "2024-01-01T00:00:00.000Z",
-                      },
-                      lastPasswordReset: {
-                        type: "string",
-                        format: "date-time",
-                        example: "2024-01-01T00:00:00.000Z",
-                      },
-                      verified: {
-                        type: "boolean",
-                        example: true,
-                      },
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "User details fetched",
+                  value: {
+                    success: true,
+                    message: "User fetched",
+                    data: {
+                      _id: "secure_user_Id",
+                      name: "John Doe",
+                      email: "john@example.com",
                       avatar: {
-                        type: "object",
-                        properties: {
-                          id: {
-                            type: "string",
-                            example: "tsttw612ww778w8w7ww",
-                          },
-                          url: {
-                            type: "string",
-                            example:
-                              "https://res.cloudinary.com/sddfgalop/image/upload/v1744710788/trusthealthcare/user/John%20Doe/5tsttw612ww778w8w7ww.png",
-                          },
-                        },
+                        id: "secure_user_Id",
+                        url: "secure_user_Id.png",
                       },
+                      role: "user",
+                      isVerified: true,
+                      courses: null,
                     },
+                    statusCode: 200,
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missingAuthToken: {
+                  summary: "Missing Auth token",
+                  value: {
+                    success: false,
+                    message: "Authentication token required.",
+                    statusCode: 400,
                   },
                 },
               },
@@ -99,23 +71,17 @@ const userSwagger = {
           },
         },
         401: {
-          description: "Unauthorized - Token Issues",
+          description: "Unauthorized",
           content: {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                missingToken: {
-                  summary: "Missing token",
-                  value: {
-                    success: false,
-                    message: "Unauthorized: Authentication token required",
-                  },
-                },
                 expiredToken: {
-                  summary: "Expired token",
+                  summary: "Expired Auth Token",
                   value: {
                     success: false,
-                    message: "Unauthorized: Invalid authentication token",
+                    message: "Session has ended.",
+                    statusCode: 401,
                   },
                 },
               },
@@ -123,25 +89,288 @@ const userSwagger = {
           },
         },
         404: {
-          description: "User Account Not Found",
+          description: "Not Found",
           content: {
             "application/json": {
-              schema: {
-                type: "object",
-                properties: {
-                  success: {
-                    type: "boolean",
-                    example: false,
-                  },
-                  message: {
-                    type: "string",
-                    example: "Not Found: User Account does not exist",
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                accountNotFound: {
+                  summary: "Account not found",
+                  value: {
+                    success: false,
+                    message: "Account not found",
+                    statusCode: 404,
                   },
                 },
               },
             },
           },
         },
+        500: { $ref: "#/components/responses/InternalServerError" },
+      },
+    },
+  },
+
+  "/update-user-info": {
+    put: {
+      summary: "Update User Profile",
+      operationId: "user-details",
+      tags: ["User"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed)",
+        },
+      ],
+      security: [
+        {
+          cookieAuth: [],
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/UpdateUserProfile",
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Created",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Profile updated",
+                  value: {
+                    success: true,
+                    message: "Profile updated",
+                    data: null,
+                    statusCode: 201,
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missingFields: {
+                  summary: "Missing Fields",
+                  value: {
+                    success: false,
+                    message: "Fields are required.",
+                    statusCode: 400,
+                  },
+                },
+                missingAuthToken: {
+                  summary: "Missing Auth token",
+                  value: {
+                    success: false,
+                    message: "Authentication token required.",
+                    statusCode: 400,
+                  },
+                },
+              },
+            },
+          },
+        },
+        401: {
+          description: "Unauthorized",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                expiredToken: {
+                  summary: "Expired Auth Token",
+                  value: {
+                    success: false,
+                    message: "Session has ended.",
+                    statusCode: 401,
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Not Found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                accountNotFound: {
+                  summary: "User not found",
+                  value: {
+                    success: false,
+                    message: "User not found",
+                    statusCode: 404,
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: { $ref: "#/components/responses/InternalServerError" },
+      },
+    },
+  },
+
+  "/update-user-password": {
+    put: {
+      summary: "Update User Password",
+      operationId: "user-password",
+      tags: ["User"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed)",
+        },
+      ],
+      security: [
+        {
+          cookieAuth: [],
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/UpdateUserPassword",
+            },
+          },
+        },
+      },
+      responses: {
+        201: {
+          description: "Created",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Password updated",
+                  value: {
+                    success: true,
+                    message: "Password updated",
+                    data: null,
+                    statusCode: 201,
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missingFields: {
+                  summary: "Missing Fields",
+                  value: {
+                    success: false,
+                    message: "Please enter old and new password",
+                    statusCode: 400,
+                  },
+                },
+                missingAuthToken: {
+                  summary: "Missing Auth token",
+                  value: {
+                    success: false,
+                    message: "Authentication token required.",
+                    statusCode: 400,
+                  },
+                },
+              },
+            },
+          },
+        },
+        401: {
+          description: "Unauthorized",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                invalidOldPassword: {
+                  summary: "Invalid old password",
+                  value: {
+                    success: false,
+                    message: "Invalid old password",
+                    statusCode: 401,
+                  },
+                },
+                expiredToken: {
+                  summary: "Expired Auth Token",
+                  value: {
+                    success: false,
+                    message: "Session has ended.",
+                    statusCode: 401,
+                  },
+                },
+              },
+            },
+          },
+        },
+        403: {
+          description: "Forbidden",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                accountNotFound: {
+                  summary: "Forbidden",
+                  value: {
+                    success: false,
+                    message: "New password must be different from old password",
+                    statusCode: 403,
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Not Found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                accountNotFound: {
+                  summary: "User not found",
+                  value: {
+                    success: false,
+                    message: "Invalid user",
+                    statusCode: 404,
+                  },
+                },
+              },
+            },
+          },
+        },
+
         500: { $ref: "#/components/responses/InternalServerError" },
       },
     },

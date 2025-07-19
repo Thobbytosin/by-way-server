@@ -215,7 +215,7 @@ export const logoutUser = catchAsyncError(
 
     res.clearCookie("_can_logged_in", hasLoggedInTokenOptions);
 
-    res.apiSuccess(null, "Logout successful");
+    res.apiSuccess(null, "Logout successfully");
   }
 );
 
@@ -298,6 +298,9 @@ export const updateUserInfo = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const { name, email } = req.body as IUpdateUserInfo;
 
+    if (!email || !name)
+      return next(new ErrorHandler("Fields are required", 400));
+
     const userId = req.user?._id as any;
 
     const user = await User.findById(userId);
@@ -354,16 +357,13 @@ export const updatePassword = catchAsyncError(
       );
 
       if (!isPasswordMatch)
-        return next(new ErrorHandler("Invalid credentials", 404));
-
-      if (!isPasswordMatch)
-        return next(new ErrorHandler("Invalid old password", 400));
+        return next(new ErrorHandler("Invalid old password", 401));
 
       if (newPassword === oldPassword)
         return next(
           new ErrorHandler(
-            "New password must be different from old passwprd",
-            422
+            "New password must be different from old password",
+            403
           )
         );
 
@@ -371,9 +371,7 @@ export const updatePassword = catchAsyncError(
 
       await user.save();
 
-      // await redis.set(`user - ${userId}`, JSON.stringify(user));
-
-      res.apiSuccess(null, "Password updated");
+      res.apiSuccess(null, "Password updated", 201);
     } catch (error: any) {
       return next(new ErrorHandler(error.name, 400));
     }

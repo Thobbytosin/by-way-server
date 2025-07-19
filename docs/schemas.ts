@@ -72,7 +72,7 @@ export const errorResponse = {
 
 export const userSignin = {
   type: "object",
-  required: [, "email", "password"],
+  required: ["email", "password"],
   properties: {
     email: {
       type: "string",
@@ -83,6 +83,59 @@ export const userSignin = {
       type: "string",
       format: "password",
       example: "SecurePassword123!",
+    },
+  },
+};
+
+export const userSocialSignin = {
+  type: "object",
+  required: ["name", "email", "avatar"],
+  properties: {
+    name: {
+      type: "string",
+      example: "John Doe",
+    },
+    email: {
+      type: "string",
+      format: "email",
+      example: "john@example.com",
+    },
+    avatar: {
+      type: "string",
+      example: "johndoe.png",
+    },
+  },
+};
+
+export const updateUserProfile = {
+  type: "object",
+  required: ["name", "email"],
+  properties: {
+    name: {
+      type: "string",
+      example: "John Doe",
+    },
+    email: {
+      type: "string",
+      format: "email",
+      example: "john@example.com",
+    },
+  },
+};
+
+export const updateUserPassword = {
+  type: "object",
+  required: ["newPassword", "oldPassword"],
+  properties: {
+    oldPassword: {
+      type: "string",
+      format: "password",
+      example: "SecurePassword123!",
+    },
+    newPassword: {
+      type: "string",
+      format: "password",
+      example: "newSecurePassword123",
     },
   },
 };

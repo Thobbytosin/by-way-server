@@ -3,7 +3,7 @@ import catchAsyncError from "./catchAsyncErrors";
 import ErrorHandler from "../utils/errorHandler";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import User, { IUser } from "../models/user.model";
+import User from "../models/user.model";
 
 dotenv.config();
 
@@ -14,9 +14,7 @@ export const isUserAuthenticated = catchAsyncError(
 
     // if there is no access token
     if (!access_token)
-      return next(
-        new ErrorHandler("Restricted: Authentication required.", 400)
-      );
+      return next(new ErrorHandler("Authentication token required.", 400));
 
     // verify access token
     const decodeAccess = jwt.verify(
@@ -24,13 +22,9 @@ export const isUserAuthenticated = catchAsyncError(
       (process.env.ACCESS_TOKEN_SIGN_IN as string) || ""
     ) as { id: string };
 
-    if (!decodeAccess.id)
-      return next(new ErrorHandler("Session has ended. Please login.", 401));
-
     const user = await User.findById(decodeAccess.id);
 
-    if (!user)
-      return next(new ErrorHandler("Please login to access this", 404));
+    if (!user) return next(new ErrorHandler("Account not found", 404));
 
     req.user = user;
 

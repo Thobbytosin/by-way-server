@@ -115,6 +115,7 @@ const authSwagger = {
       },
     },
   },
+
   "/activate-user": {
     post: {
       summary: "Verify User Email",
@@ -233,6 +234,7 @@ const authSwagger = {
       },
     },
   },
+
   "/login": {
     post: {
       summary: "Login User",
@@ -248,11 +250,6 @@ const authSwagger = {
           },
           description:
             "User's cookie consent object (used to determine if request is allowed)",
-        },
-      ],
-      security: [
-        {
-          cookieAuth: [],
         },
       ],
       requestBody: {
@@ -273,12 +270,24 @@ const authSwagger = {
               schema: { $ref: "#/components/schemas/SuccessResponse" },
               examples: {
                 successResponse: {
-                  summary: "Account Verification Success",
+                  summary: "Login Success",
                   value: {
                     success: true,
-                    message: "Account verified successfully",
-                    data: null,
-                    statusCode: 201,
+                    message: "Logged in successfully",
+                    data: {
+                      _id: "secure_user_Id",
+                      name: "John Doe",
+                      email: "john@example.com",
+                      avatar: {
+                        id: "secure_user_Id",
+                        url: "secure_user_Id.png",
+                      },
+                      role: "user",
+                      isVerified: true,
+                      courses: null,
+                      expiresAt: 1721326600000,
+                    },
+                    statusCode: 200,
                   },
                 },
               },
@@ -314,6 +323,242 @@ const authSwagger = {
                   value: {
                     success: false,
                     message: "Invalid credentials.",
+                    statusCode: 401,
+                  },
+                },
+              },
+            },
+          },
+        },
+        404: {
+          description: "Not Found",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                accountNotFound: {
+                  summary: "Account not found",
+                  value: {
+                    success: false,
+                    message: "Account not found",
+                    statusCode: 404,
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: { $ref: "#/components/responses/InternalServerError" },
+      },
+    },
+  },
+
+  "/social-auth": {
+    post: {
+      summary: "Social Authentication",
+      operationId: "social-auth",
+      tags: ["Authentication"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed)",
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/UserSignSocialin",
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "OK",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Login Success",
+                  value: {
+                    success: true,
+                    message: "Logged in successfully",
+                    data: {
+                      _id: "secure_user_Id",
+                      name: "John Doe",
+                      email: "john@example.com",
+                      avatar: {
+                        id: "secure_user_Id",
+                        url: "secure_user_Id.png",
+                      },
+                      role: "user",
+                      isVerified: true,
+                      courses: null,
+                    },
+                    statusCode: 200,
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missingParameters: {
+                  summary: "Missing required parameters",
+                  value: {
+                    success: false,
+                    message: "Please provide name and email",
+                    statusCode: 400,
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: { $ref: "#/components/responses/InternalServerError" },
+      },
+    },
+  },
+
+  "/logout": {
+    post: {
+      summary: "Logout",
+      operationId: "logout",
+      tags: ["Authentication"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed)",
+        },
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              $ref: "#/components/schemas/UserSignSocialin",
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "OK",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Logout Success",
+                  value: {
+                    success: true,
+                    message: "Logout successfully",
+                    data: null,
+                    statusCode: 200,
+                  },
+                },
+              },
+            },
+          },
+        },
+        500: { $ref: "#/components/responses/InternalServerError" },
+      },
+    },
+  },
+
+  "/refresh-tokens": {
+    get: {
+      summary: "Refresh Tokens",
+      operationId: "refreshTokens",
+      tags: ["Authentication"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed)",
+        },
+      ],
+      security: [
+        {
+          cookieRefresh: [],
+        },
+      ],
+      responses: {
+        200: {
+          description: "OK",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/SuccessResponse" },
+              examples: {
+                successResponse: {
+                  summary: "Tokens Refreshed",
+                  value: {
+                    success: true,
+                    message: "Tokens Refreshed",
+                    data: {
+                      expiresAt: 1721326600000,
+                    },
+                    statusCode: 200,
+                  },
+                },
+              },
+            },
+          },
+        },
+        400: {
+          description: "Bad Request",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                missingToken: {
+                  summary: "Missing token",
+                  value: {
+                    success: false,
+                    message: "Token is required",
+                    statusCode: 400,
+                  },
+                },
+              },
+            },
+          },
+        },
+        401: {
+          description: "Unauthorized",
+          content: {
+            "application/json": {
+              schema: { $ref: "#/components/schemas/ErrorResponse" },
+              examples: {
+                expiredToken: {
+                  summary: "Expired Token",
+                  value: {
+                    success: false,
+                    message: "Session has ended.",
                     statusCode: 401,
                   },
                 },

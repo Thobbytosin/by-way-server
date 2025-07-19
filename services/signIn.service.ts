@@ -30,14 +30,14 @@ export const sendToken = async (
   const accessToken = jwt.sign(
     { id: user._id },
     process.env.ACCESS_TOKEN_SIGN_IN as string,
-    { expiresIn: `${accessTokenExpire as any}m` || "59m" }
+    { expiresIn: `${accessTokenExpire as any}m` }
   );
 
   // generate unique refresh token when user logs in
   const refreshToken = jwt.sign(
     { id: user._id },
     process.env.REFRESH_TOKEN_SIGN_IN as string,
-    { expiresIn: `${refreshTokenExpire as any}d` || "7d" }
+    { expiresIn: `${refreshTokenExpire as any}d` }
   );
 
   const loggedInToken = process.env.LOGGED_IN_TOKEN;

@@ -1,34 +1,24 @@
 import { NextFunction, Response } from "express";
 import User from "../models/user.model";
-// import { redis } from "../utils/redis";
 import ErrorHandler from "../utils/errorHandler";
 import { TUser } from "./signIn.service";
 
 // get user by id
 export const getUserId = async (res: Response, id: string) => {
-  // const userJson = await redis.get(`user - ${id}`);
-  const userJson = false;
+  const user = await User.findById(id);
+  if (!user) return;
 
-  if (userJson) {
-    const user = JSON.parse(userJson);
+  const formattedUser: TUser = {
+    _id: user._id as string,
+    avatar: user.avatar,
+    courses: user.courses,
+    email: user.email,
+    isVerified: user.isVerified,
+    name: user.name,
+    role: user.role,
+  };
 
-    res.apiSuccess(user, "User fetched");
-  } else {
-    const user = await User.findById(id);
-    if (!user) return;
-
-    const formattedUser: TUser = {
-      _id: user._id as string,
-      avatar: user.avatar,
-      courses: user.courses,
-      email: user.email,
-      isVerified: user.isVerified,
-      name: user.name,
-      role: user.role,
-    };
-
-    res.apiSuccess(formattedUser, "User fetched");
-  }
+  res.apiSuccess(formattedUser, "User fetched");
 };
 
 // get all users
