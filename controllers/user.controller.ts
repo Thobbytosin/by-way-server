@@ -389,27 +389,18 @@ export const updateProfilePicture = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const { avatar } = req.files;
 
-    // console.log(avatar);
+    if (!avatar) return next(new ErrorHandler("Please provide an image", 400));
 
-    if (!avatar) return next(new ErrorHandler("Please provide an image", 422));
-
-    const userId = req?.user._id as any;
-
-    if (!userId)
-      return next(new ErrorHandler("Please log in to upload picture.", 403));
-
-    const user = await User.findById(userId);
-
-    if (!user) return next(new ErrorHandler("User not found", 404));
+    const user = req.user;
 
     if (Array.isArray(avatar))
-      return next(new ErrorHandler("Multiple images not allowed", 422));
+      return next(new ErrorHandler("Multiple images not allowed", 403));
 
     if (!avatar.mimetype?.startsWith("image"))
       return next(
         new ErrorHandler(
           "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
-          404
+          422
         )
       );
 
@@ -454,7 +445,7 @@ export const updateProfilePicture = catchAsyncError(
       }
     );
 
-    res.apiSuccess(null, "Avatar updated", 201);
+    res.apiSuccess(null, "Profile image updated", 201);
   }
 );
 
@@ -485,7 +476,7 @@ export const getAdmin = catchAsyncError(
       .select("-password")
       .sort({ createdAt: -1 });
 
-    if (!admins) return next(new ErrorHandler("Admins not found", 404));
+    if (!admins) return next(new ErrorHandler("Admin not found", 404));
 
     const admin = admins[0];
 
@@ -500,7 +491,10 @@ export const updateUserRole = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, role }: { email: string; role: string } = req.body;
 
-    if (!email || !role) return next(new ErrorHandler("Invalid entry", 422));
+    if (!email || !role)
+      return next(
+        new ErrorHandler("Please provide your email and select a role", 400)
+      );
 
     updateUserRoleService(res, email, role, next);
   }
@@ -524,11 +518,11 @@ export const deleteUser = catchAsyncError(
 export const getAllUsersLatestInfo = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const users = await User.find().select(
+      const users = await User.find({ role: "user" }).select(
         "-courses -isVerified -createdAt -updatedAt -_v -email"
       );
 
-      if (!users) return next(new ErrorHandler("User not found", 404));
+      if (!users) return next(new ErrorHandler("Users not found", 404));
 
       res.apiSuccess(users, "Users list fetched");
     } catch (error: any) {
@@ -569,7 +563,7 @@ export const markVideoAsViewed = catchAsyncError(
     //   JSON.stringify(newUser) as any
     // );
 
-    res.apiSuccess(null, "You have completed this lesson. Well done!");
+    res.apiSuccess(null, "You have completed this lesson. Well done!", 201);
   }
 );
 
@@ -592,9 +586,8 @@ export const getUserCoursesSummary = catchAsyncError(
 
     const user = await User.findById(loggedInUserId).lean();
 
-    if (!user || !user.courses) {
-      return res.status(404).json({ message: "User or courses not found" });
-    }
+    if (!user || !user.courses)
+      return next(new ErrorHandler("User or courses not found", 404));
 
     const results = await Promise.all(
       user.courses.map(async (courseItem: any) => {

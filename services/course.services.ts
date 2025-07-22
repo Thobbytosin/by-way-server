@@ -8,7 +8,7 @@ export const createCourse = catchAsyncError(
   async (data: any, res: Response, next: NextFunction) => {
     await Course.create(data);
 
-    res.apiSuccess(null, "Course created", 201);
+    res.apiSuccess(null, "Course uploaded", 201);
   }
 );
 

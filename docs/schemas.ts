@@ -139,3 +139,34 @@ export const updateUserPassword = {
     },
   },
 };
+
+export const updateUserRole = {
+  type: "object",
+  required: ["email", "role"],
+  properties: {
+    email: {
+      type: "string",
+      format: "email",
+      example: "john@example.com",
+    },
+    role: {
+      type: "string",
+      example: "admin",
+    },
+  },
+};
+
+export const updateViewedCourses = {
+  type: "object",
+  required: ["courseId", "videoId"],
+  properties: {
+    courseId: {
+      type: "string",
+      example: "course-1-id",
+    },
+    videoId: {
+      type: "string",
+      example: "video-i-id",
+    },
+  },
+};

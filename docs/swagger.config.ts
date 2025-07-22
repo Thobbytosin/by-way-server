@@ -9,6 +9,8 @@ import {
   userSocialSignin,
   updateUserProfile,
   updateUserPassword,
+  updateUserRole,
+  updateViewedCourses,
 } from "./schemas";
 import {
   cookieAuth,
@@ -63,6 +65,8 @@ const swaggerConfig = {
       UpdateUserProfile: updateUserProfile,
       UpdateUserPassword: updateUserPassword,
       AccountVerfification: accountVerfification,
+      UpdateUserRole: updateUserRole,
+      UpdateViewedCourses: updateViewedCourses,
     },
     responses: {
       InternalServerError: internalServerError,

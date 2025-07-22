@@ -38,7 +38,7 @@ export const authorizeRoles = (...roles: string[]) => {
     if (!roles.includes(req.user?.role || "")) {
       return next(
         new ErrorHandler(
-          `Role: ${req.user?.role} is restricted to access this`,
+          `Role: You are restricted to access this resource.`,
           403
         )
       );

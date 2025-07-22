@@ -37,7 +37,7 @@ export const getAllAdminsService = async (
     .select("-password")
     .sort({ createdAt: -1 });
 
-  if (!admins) return next(new ErrorHandler("Admins not found", 404));
+  if (!admins) return next(new ErrorHandler("Admin list not found", 404));
 
   res.apiSuccess(admins, "Admin list fetched");
 };
@@ -49,15 +49,13 @@ export const updateUserRoleService = async (
   role: string,
   next: NextFunction
 ) => {
-  const user = await User.findOneAndUpdate(
+  await User.findOneAndUpdate(
     { email },
     {
       role,
     },
     { new: true }
   );
-
-  if (!user) return next(new ErrorHandler("User not found", 404));
 
   res.apiSuccess(null, "Role updated", 201);
 };
