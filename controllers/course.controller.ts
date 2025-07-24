@@ -34,18 +34,10 @@ export const uploadCourse = catchAsyncError(
     data.benefits = parsedBenefits;
     data.courseData = parsedCourseData;
 
-    console.log("CREATE DATA:", data);
-
     if (!demoVideo)
-      return next(new ErrorHandler("Upload Course Intro Video", 403));
+      return next(new ErrorHandler("Upload Course Intro Video", 400));
 
-    if (!data) return next(new ErrorHandler("Fields are missing", 422));
-
-    const userId = req.user?._id;
-
-    const user = await User.findById(userId);
-
-    if (!user) return next(new ErrorHandler("Error finding user", 404));
+    if (!data) return next(new ErrorHandler("Fields are missing", 400));
 
     // check if course exist
     const isCourseExist = await Course.findOne({ name: data.name });
@@ -55,7 +47,7 @@ export const uploadCourse = catchAsyncError(
 
     // for image upload
 
-    if (!thumbnail) return next(new ErrorHandler("Upload Course Image", 403));
+    if (!thumbnail) return next(new ErrorHandler("Upload Course Banner", 400));
 
     if (Array.isArray(thumbnail))
       return next(new ErrorHandler("Multiple images not allowed", 422));
@@ -64,7 +56,7 @@ export const uploadCourse = catchAsyncError(
       return next(
         new ErrorHandler(
           "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
-          404
+          422
         )
       );
 
@@ -83,7 +75,10 @@ export const uploadCourse = catchAsyncError(
           },
         },
         async (error: any, result) => {
-          if (error) return next(new ErrorHandler(error.message, 400));
+          if (error)
+            return next(
+              new ErrorHandler("Failed to upload image on server", 401)
+            );
 
           const publicId = result?.public_id;
 
@@ -107,8 +102,8 @@ export const uploadCourse = catchAsyncError(
     if (!demoVideo.mimetype?.startsWith("video/")) {
       return next(
         new ErrorHandler(
-          "Invalid format. File must be a video (e.g., .mp4, .mov)",
-          400
+          "Invalid video format. File must be a video (e.g., .mp4, .mov)",
+          422
         )
       );
     }
@@ -145,7 +140,10 @@ export const uploadCourse = catchAsyncError(
           ],
         },
         async (error: any, result) => {
-          if (error) return next(new ErrorHandler(error.message, 400));
+          if (error)
+            return next(
+              new ErrorHandler("Failed to upload video to server", 401)
+            );
 
           const publicId = result?.public_id;
 
@@ -195,14 +193,15 @@ export const editCourse = catchAsyncError(
     if (!isCourseExist) return next(new ErrorHandler("Course not found", 404));
 
     if (!demoVideo && !data.demoVideo)
-      return next(new ErrorHandler("Upload Course Intro Video", 403));
+      return next(new ErrorHandler("Upload Course Intro Video", 400));
 
-    if (!data) return next(new ErrorHandler("Fields are missing", 422));
+    if (!data) return next(new ErrorHandler("Fields are missing", 400));
 
     // for image upload
 
     if (!data.thumbnail) {
-      if (!thumbnail) return next(new ErrorHandler("Upload Course Image", 403));
+      if (!thumbnail)
+        return next(new ErrorHandler("Upload Course Banner", 400));
 
       if (Array.isArray(thumbnail))
         return next(new ErrorHandler("Multiple images not allowed", 422));
@@ -211,7 +210,7 @@ export const editCourse = catchAsyncError(
         return next(
           new ErrorHandler(
             "Invalid image format. File must be an image(.jpg, .png, .jpeg)",
-            404
+            422
           )
         );
 
@@ -230,7 +229,10 @@ export const editCourse = catchAsyncError(
             },
           },
           async (error: any, result) => {
-            if (error) return next(new ErrorHandler(error.message, 400));
+            if (error)
+              return next(
+                new ErrorHandler("Failed to upload image on server", 401)
+              );
 
             const publicId = result?.public_id;
 
@@ -257,7 +259,7 @@ export const editCourse = catchAsyncError(
         return next(
           new ErrorHandler(
             "Invalid format. File must be a video (e.g., .mp4, .mov)",
-            400
+            422
           )
         );
       }
@@ -293,7 +295,10 @@ export const editCourse = catchAsyncError(
             ],
           },
           async (error: any, result) => {
-            if (error) return next(new ErrorHandler(error.message, 400));
+            if (error)
+              return next(
+                new ErrorHandler("Failed to upload image on server", 401)
+              );
 
             const publicId = result?.public_id;
 
@@ -328,31 +333,15 @@ export const editCourse = catchAsyncError(
 
 export const getSingleCourse = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const courseId = req.params.course_id;
+    const courseId = req.params.course_id;
 
-      // const isCacheExists = await redis.get(`course - ${courseId}`);
-      const isCacheExists = false;
+    const course = await Course.findById(courseId).select(
+      "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+    );
 
-      if (isCacheExists) {
-        const course = JSON.parse(isCacheExists);
+    if (!course) return next(new ErrorHandler("Course not found", 404));
 
-        res.status(200).json({ success: true, course });
-      } else {
-        const course = await Course.findById(courseId).select(
-          "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-        );
-        // console.log(course);
-
-        if (!course) return next(new ErrorHandler("Course not found", 404));
-
-        // await redis.set(`course - ${courseId}`, JSON.stringify(course));
-
-        res.apiSuccess(course, "Course fetched");
-      }
-    } catch (error: any) {
-      return next(new ErrorHandler(error.messsage, 400));
-    }
+    res.apiSuccess(course, "Course fetched");
   }
 );
 
@@ -361,28 +350,13 @@ export const getSingleCourse = catchAsyncError(
 
 export const getAllCourses = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      // const isCacheExists = await redis.get("allCourses");
-      const isCacheExists = false;
+    const courses = await Course.find().select(
+      "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
+    );
 
-      if (isCacheExists) {
-        const courses = JSON.parse(isCacheExists);
+    if (!courses) return next(new ErrorHandler("Error fetching courses", 404));
 
-        res.status(200).json({ success: true, courses });
-      } else {
-        const courses = await Course.find().select(
-          "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-        );
-
-        if (!courses) return next(new ErrorHandler("Course not found", 404));
-
-        // await redis.set("allCourses", JSON.stringify(courses));
-
-        res.apiSuccess(courses, "Courses fetched");
-      }
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(courses, "Courses fetched");
   }
 );
 
@@ -391,30 +365,26 @@ export const getAllCourses = catchAsyncError(
 
 export const getCourseByUser = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const userCourseList = req.user?.courses;
+    const userCourseList = req.user?.courses;
 
-      const courseId = req.params.course_id;
+    const courseId = req.params.course_id;
 
-      const courseExists = userCourseList.find(
-        (course: any) => course.courseId === courseId
+    const courseExists = userCourseList.find(
+      (course: any) => course.courseId === courseId
+    );
+
+    if (!courseExists)
+      return next(
+        new ErrorHandler("You are not eligible to access this course", 403)
       );
 
-      if (!courseExists)
-        return next(
-          new ErrorHandler("You are not eligible to access this course", 403)
-        );
+    const course = await Course.findById(courseId);
 
-      const course = await Course.findById(courseId);
+    if (!course) return next(new ErrorHandler("Course not found", 404));
 
-      if (!course) return next(new ErrorHandler("Course not found", 404));
+    const content = course.courseData;
 
-      const content = course.courseData;
-
-      res.apiSuccess(content, "Course content fetched");
-    } catch (error: any) {
-      return next(new ErrorHandler(error.name, 400));
-    }
+    res.apiSuccess(content, "Course content fetched");
   }
 );
 

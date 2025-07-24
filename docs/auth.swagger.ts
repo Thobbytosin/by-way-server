@@ -11,9 +11,10 @@ const authSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       requestBody: {
@@ -128,9 +129,10 @@ const authSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -247,9 +249,10 @@ const authSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       requestBody: {
@@ -365,9 +368,10 @@ const authSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       requestBody: {
@@ -446,9 +450,10 @@ const authSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       requestBody: {
@@ -498,9 +503,10 @@ const authSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [

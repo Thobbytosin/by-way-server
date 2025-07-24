@@ -11,9 +11,10 @@ const userSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -123,9 +124,10 @@ const userSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -242,9 +244,10 @@ const userSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -388,9 +391,10 @@ const userSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -552,9 +556,10 @@ const userSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -666,9 +671,10 @@ const userSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -815,6 +821,19 @@ const userSwagger = {
       summary: "Users Latest list",
       operationId: "users-latest-list",
       tags: ["User"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+            example: '{"accept": false}',
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
+        },
+      ],
       responses: {
         200: {
           description: "OK",
@@ -882,6 +901,19 @@ const userSwagger = {
       summary: "Get Admin",
       operationId: "get-admin",
       tags: ["User"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+            example: '{"accept": false}',
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
+        },
+      ],
       responses: {
         200: {
           description: "OK",
@@ -939,6 +971,19 @@ const userSwagger = {
       summary: "User Courses Summary",
       operationId: "user-courses-summary",
       tags: ["User"],
+      parameters: [
+        {
+          in: "header",
+          name: "x-cookie-consent",
+          required: true,
+          schema: {
+            type: "string",
+            example: '{"accept": false}',
+          },
+          description:
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
+        },
+      ],
       responses: {
         200: {
           description: "OK",

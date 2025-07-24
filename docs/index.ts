@@ -4,8 +4,9 @@ import adminSwagger from "./admin.swagger";
 import courseSwagger from "./course.swagger";
 
 const paths = {
-  ...userSwagger,
   ...authSwagger,
+  ...userSwagger,
+  ...courseSwagger,
   ...adminSwagger,
 };
 

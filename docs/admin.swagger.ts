@@ -11,9 +11,10 @@ const adminSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -108,7 +109,7 @@ const adminSwagger = {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                expiredToken: {
+                restrictedResource: {
                   summary: "Restricted Page",
                   value: {
                     success: false,
@@ -156,9 +157,10 @@ const adminSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
       ],
       security: [
@@ -246,7 +248,7 @@ const adminSwagger = {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                expiredToken: {
+                restrictedResource: {
                   summary: "Restricted Page",
                   value: {
                     success: false,
@@ -284,7 +286,7 @@ const adminSwagger = {
 
   "/delete-user/:userId": {
     delete: {
-      summary: "Delete User Account",
+      summary: "Delete user account by id",
       operationId: "delete-user",
       tags: ["Admin"],
       parameters: [
@@ -294,9 +296,10 @@ const adminSwagger = {
           required: true,
           schema: {
             type: "string",
+            example: '{"accept": false}',
           },
           description:
-            "User's cookie consent object (used to determine if request is allowed)",
+            "User's cookie consent object (used to determine if request is allowed). Must be a stringified JSON object like: accept: true or accept: false",
         },
         {
           in: "path",
@@ -374,7 +377,7 @@ const adminSwagger = {
             "application/json": {
               schema: { $ref: "#/components/schemas/ErrorResponse" },
               examples: {
-                expiredToken: {
+                restrictedResource: {
                   summary: "Restricted Page",
                   value: {
                     success: false,
@@ -398,167 +401,6 @@ const adminSwagger = {
                   value: {
                     success: false,
                     message: "Account not found",
-                    statusCode: 404,
-                  },
-                },
-              },
-            },
-          },
-        },
-        500: { $ref: "#/components/responses/InternalServerError" },
-      },
-    },
-  },
-
-  "/create-course": {
-    post: {
-      summary: "Upload Course",
-      operationId: "upload-course",
-      tags: ["Admin"],
-      parameters: [
-        {
-          in: "header",
-          name: "x-cookie-consent",
-          required: true,
-          schema: {
-            type: "string",
-          },
-          description:
-            "User's cookie consent object (used to determine if request is allowed)",
-        },
-      ],
-      security: [
-        {
-          cookieAuth: [],
-        },
-      ],
-      requestBody: {
-        required: true,
-        content: {
-          "multipart/form-data": {
-            schema: {
-              type: "object",
-              required: [
-                "name",
-                "level",
-                "tags",
-                "avatar",
-                "description",
-                "price",
-                "thumbnail",
-                "demoVideo",
-                "category",
-              ],
-              properties: {
-                name: {
-                  type: "string",
-                },
-                description: {
-                  type: "string",
-                },
-                price: {
-                  type: "number",
-                },
-                estimatedPrice: {
-                  type: "number",
-                },
-                thumbnail: {
-                  type: "string",
-                  format: "binary",
-                },
-                tags: {
-                  type: "string",
-                },
-                level: {
-                  type: "string",
-                },
-                category: {
-                  type: "string",
-                },
-                demoVideo: {
-                  type: "string",
-                  format: "binary",
-                },
-              },
-            },
-          },
-        },
-      },
-      responses: {
-        201: {
-          description: "Course uploaded",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/SuccessResponse" },
-              examples: {
-                successResponse: {
-                  summary: "Course uploaded",
-                  value: {
-                    success: true,
-                    message: "Course uploaded",
-                    data: null,
-                    statusCode: 201,
-                  },
-                },
-              },
-            },
-          },
-        },
-        400: {
-          description: "Bad Request",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/ErrorResponse" },
-              examples: {
-                missingFields: {
-                  summary: "Missing Fields",
-                  value: {
-                    success: false,
-                    message: "Fields are required.",
-                    statusCode: 400,
-                  },
-                },
-                missingAuthToken: {
-                  summary: "Missing Auth token",
-                  value: {
-                    success: false,
-                    message: "Authentication token required.",
-                    statusCode: 400,
-                  },
-                },
-              },
-            },
-          },
-        },
-        401: {
-          description: "Unauthorized",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/ErrorResponse" },
-              examples: {
-                expiredToken: {
-                  summary: "Expired Auth Token",
-                  value: {
-                    success: false,
-                    message: "Session has ended.",
-                    statusCode: 401,
-                  },
-                },
-              },
-            },
-          },
-        },
-        404: {
-          description: "Not Found",
-          content: {
-            "application/json": {
-              schema: { $ref: "#/components/schemas/ErrorResponse" },
-              examples: {
-                accountNotFound: {
-                  summary: "User not found",
-                  value: {
-                    success: false,
-                    message: "User not found",
                     statusCode: 404,
                   },
                 },
