@@ -335,9 +335,7 @@ export const getSingleCourse = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
     const courseId = req.params.course_id;
 
-    const course = await Course.findById(courseId).select(
-      "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-    );
+    const course = await Course.findById(courseId).select("-courseData");
 
     if (!course) return next(new ErrorHandler("Course not found", 404));
 
@@ -350,9 +348,7 @@ export const getSingleCourse = catchAsyncError(
 
 export const getAllCourses = catchAsyncError(
   async (req: Request, res: Response, next: NextFunction) => {
-    const courses = await Course.find().select(
-      "-courseData.videoUrl -courseData.suggestion -courseData.questions -courseData.links"
-    );
+    const courses = await Course.find().select("-courseData");
 
     if (!courses) return next(new ErrorHandler("Error fetching courses", 404));
 

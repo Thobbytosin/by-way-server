@@ -7,6 +7,15 @@ const userSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -118,6 +127,15 @@ const userSwagger = {
       operationId: "user-details",
       tags: ["User"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -238,6 +256,15 @@ const userSwagger = {
       operationId: "user-password",
       tags: ["User"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -385,6 +412,15 @@ const userSwagger = {
       operationId: "user-profile-image",
       tags: ["User"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -552,6 +588,15 @@ const userSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -665,6 +710,15 @@ const userSwagger = {
       operationId: "update-viewed-courses",
       tags: ["User"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -824,6 +878,15 @@ const userSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -904,6 +967,15 @@ const userSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -972,6 +1044,15 @@ const userSwagger = {
       operationId: "user-courses-summary",
       tags: ["User"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",

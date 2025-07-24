@@ -7,6 +7,15 @@ const adminSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -153,6 +162,15 @@ const adminSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -284,12 +302,21 @@ const adminSwagger = {
     },
   },
 
-  "/delete-user/:userId": {
+  "/delete-user/{userId}": {
     delete: {
       summary: "Delete user account by id",
       operationId: "delete-user",
       tags: ["Admin"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",

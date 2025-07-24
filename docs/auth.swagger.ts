@@ -7,6 +7,15 @@ const authSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -123,6 +132,15 @@ const authSwagger = {
       operationId: "verifyEmail",
       tags: ["Authentication"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -245,6 +263,15 @@ const authSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -364,6 +391,15 @@ const authSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -446,6 +482,15 @@ const authSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -497,6 +542,15 @@ const authSwagger = {
       operationId: "refreshTokens",
       tags: ["Authentication"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",

@@ -7,6 +7,15 @@ const courseSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -283,12 +292,21 @@ const courseSwagger = {
     },
   },
 
-  "/edit-course/:course_id": {
+  "/edit-course/{course_id}": {
     put: {
       summary: "Update Course by id",
       operationId: "upload-course",
       tags: ["Course"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -583,12 +601,21 @@ const courseSwagger = {
     },
   },
 
-  "/get-course/:course_id": {
+  "/get-course/{course_id}": {
     get: {
       summary: "Fetch course details by id",
       operationId: "get-course-details",
       tags: ["Course"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -783,6 +810,15 @@ const courseSwagger = {
       parameters: [
         {
           in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
+        {
+          in: "header",
           name: "x-cookie-consent",
           required: true,
           schema: {
@@ -898,12 +934,21 @@ const courseSwagger = {
     },
   },
 
-  "/get-course-free/:course_id": {
+  "/get-course-free/{course_id}": {
     get: {
       summary: "(Unauthenticated) Fetch course details by id",
       operationId: "get-course-details-unauntenticated",
       tags: ["Course"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",
@@ -1041,12 +1086,21 @@ const courseSwagger = {
     },
   },
 
-  "/get-course-content/:course_id": {
+  "/get-course-content/{course_id}": {
     get: {
       summary: "Fetch course content by id",
       operationId: "get-course-content",
       tags: ["Course"],
       parameters: [
+        {
+          in: "header",
+          name: "x-swagger-mock",
+          required: true,
+          schema: {
+            type: "string",
+            example: "true",
+          },
+        },
         {
           in: "header",
           name: "x-cookie-consent",

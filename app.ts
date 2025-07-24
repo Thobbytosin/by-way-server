@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import ErrorMiddleware from "./middlewares/error";
 import userRouter from "./routes/user.route";
 import courseRouter from "./routes/course.route";
@@ -15,6 +15,7 @@ import { checkCookieConsent } from "./middlewares/cookie-consent";
 import { limiter } from "./middlewares/rateLimit";
 import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./docs/swaggerDocument";
+import { protectDB } from "./middlewares/protectDb";
 
 export const app = express();
 dotenv.config();
@@ -80,6 +81,8 @@ app.get("/api/v1/ui-health", (_, res) => {
 
   res.status(200).json({ status: "OK" });
 });
+
+app.use(protectDB); // protect main db from swagger
 
 app.use(responseFormatter);
 
